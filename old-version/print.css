@@ -1,0 +1,209 @@
+/* Print Styles for AIRAC Cycles Explorer */
+
+@media print {
+    /* Reset colors and backgrounds */
+    :root {
+        /* Override the color variables for print */
+        --color-background: #ffffff;
+        --color-surface: #ffffff;
+        --color-on-surface: #000000;
+        --color-border: #cccccc;
+        --color-primary-500: #000000;
+        --color-primary-600: #000000;
+        --color-on-surface-muted: #666666;
+    }
+    
+    /* Hide elements not needed for print */
+    .theme-toggle,
+    .skip-link,
+    .search-bar,
+    .controls,
+    .timeline-container,
+    .header-actions,
+    .table-actions,
+    .actions-col,
+    .modal,
+    .toast-container,
+    .card-grid .card:not(.current-cycle-info),
+    .export-dropdown,
+    .pagination,
+    .table-filters,
+    footer .footer-section:not(:first-child),
+    button:not(.sr-only) {
+        display: none !important;
+    }
+    
+    /* Basic reset */
+    * {
+        background-color: transparent !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+        transition: none !important;
+        animation: none !important;
+    }
+    
+    /* General layout */
+    html, body {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background: none;
+        font-size: 12pt;
+        line-height: 1.5;
+    }
+    
+    .container {
+        max-width: 100%;
+        margin: 0;
+        padding: var(--space-4);
+        box-shadow: none;
+        border: none;
+    }
+    
+    /* Typography */
+    h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid;
+        page-break-inside: avoid;
+        color: #000 !important;
+        margin-top: var(--space-6);
+    }
+    
+    h1 {
+        font-size: 24pt;
+        margin-bottom: var(--space-6);
+    }
+    
+    h2 {
+        font-size: 18pt;
+    }
+    
+    h3 {
+        font-size: 14pt;
+    }
+    
+    p, li {
+        font-size: 12pt;
+        orphans: 3;
+        widows: 3;
+        color: #000;
+    }
+    
+    /* Tables */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: var(--space-6) 0;
+        page-break-inside: auto;
+    }
+    
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+    
+    th {
+        background-color: #f0f0f0 !important;
+        color: #000 !important;
+        border-bottom: 1pt solid #000;
+        font-weight: var(--font-weight-bold);
+        text-align: left;
+        padding: var(--space-3);
+    }
+    
+    td {
+        border-bottom: 1pt solid var(--color-border);
+        padding: var(--space-3);
+    }
+    
+    /* Cards and containers */
+    .card {
+        border: 1pt solid var(--color-border);
+        padding: var(--space-4);
+        margin-bottom: var(--space-6);
+        page-break-inside: avoid;
+    }
+    
+    /* Status indicators */
+    .status {
+        border: 1pt solid #000;
+        padding: var(--space-1) var(--space-3);
+        font-weight: var(--font-weight-semibold);
+    }
+    
+    .status-active {
+        background-color: #f0f0f0 !important;
+    }
+    
+    /* Current cycle highlighting */
+    .current-cycle {
+        background-color: #f5f5f5 !important;
+    }
+    
+    /* Logo and header */
+    header {
+        text-align: center;
+        margin-bottom: var(--space-8);
+        padding-bottom: var(--space-4);
+        border-bottom: 1pt solid #000;
+    }
+    
+    .logo-wrapper {
+        display: none;
+    }
+    
+    /* Add explicit content markers */
+    .current-cycle-info::before {
+        content: "CURRENT CYCLE INFORMATION";
+        display: block;
+        font-weight: var(--font-weight-bold);
+        font-size: 14pt;
+        margin-bottom: var(--space-4);
+        text-align: center;
+        text-transform: uppercase;
+    }
+    
+    table::before {
+        content: "AIRAC CYCLES DATA";
+        display: block;
+        font-weight: var(--font-weight-bold);
+        font-size: 14pt;
+        margin-bottom: var(--space-4);
+        text-transform: uppercase;
+    }
+    
+    /* Footer and URLs */
+    a {
+        color: #000;
+        text-decoration: underline;
+    }
+    
+    a[href^="http"]::after {
+        content: " (" attr(href) ")";
+        font-size: 90%;
+        color: #555;
+    }
+    
+    /* Add a print message */
+    footer {
+        margin-top: var(--space-8);
+        padding-top: var(--space-4);
+        border-top: 1pt solid #000;
+        text-align: center;
+        font-size: 10pt;
+        color: #666;
+    }
+    
+    footer::after {
+        content: "Printed from AIRAC Cycles Explorer. For the most up-to-date information, please visit the online version.";
+        display: block;
+        margin-top: var(--space-4);
+        font-style: italic;
+        font-size: 10pt;
+    }
+    
+    /* Page setup */
+    @page {
+        margin: 1.5cm;
+        size: portrait;
+    }
+} 
