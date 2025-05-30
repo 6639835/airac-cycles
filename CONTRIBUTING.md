@@ -14,7 +14,7 @@ Thank you for your interest in contributing to the AIRAC Cycles Explorer! We wel
 1. **Fork the repository** on GitHub
 2. **Clone your fork** locally:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/airac-cycles.git
+   git clone https://github.com/6639835/airac-cycles.git
    cd airac-cycles
    ```
 
