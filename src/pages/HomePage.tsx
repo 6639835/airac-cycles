@@ -12,24 +12,19 @@ import {
   ChevronRight,
   Bookmark,
   BookmarkCheck,
-  Keyboard,
-  Filter,
   X,
-  Star,
-  Globe,
+  ArrowRight,
   AlertCircle,
   PlaneTakeoff,
   PlaneLanding,
-  ArrowRight,
-  Layers,
-  Shield,
+  Globe,
   History,
+  Shield,
   LucideIcon
 } from 'lucide-react'
 import { useAirac } from '@/hooks/useAirac'
 import { CycleCard } from '@/components/CycleCard'
 import { CurrentCycleCard } from '@/components/CurrentCycleCard'
-import { StatsCard } from '@/components/StatsCard'
 import { useTheme } from '@/contexts/ThemeContext'
 
 interface FeatureItem {
@@ -115,15 +110,6 @@ export function HomePage() {
 
   const handleStatusFilter = (status: string) => {
     updateFilters({ status: status as any })
-  }
-
-  const toggleBookmark = (cycleId: string) => {
-    const newBookmarks = bookmarkedCycles.includes(cycleId)
-      ? bookmarkedCycles.filter(id => id !== cycleId)
-      : [...bookmarkedCycles, cycleId]
-    
-    setBookmarkedCycles(newBookmarks)
-    localStorage.setItem('airac-bookmarks', JSON.stringify(newBookmarks))
   }
 
   const filteredBookmarkedCycles = cycles.filter(cycle => 

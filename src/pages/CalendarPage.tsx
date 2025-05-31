@@ -4,15 +4,12 @@ import { Link } from 'react-router-dom'
 import { 
   ChevronLeft, 
   ChevronRight, 
-  Clock,
   Download,
   PrinterIcon,
   Share2,
   Calendar as CalendarIcon,
   Info,
-  ArrowRight,
-  Check,
-  Copy
+  ArrowRight
 } from 'lucide-react'
 import { 
   format, 
@@ -26,8 +23,7 @@ import {
   isWithinInterval,
   startOfWeek,
   endOfWeek,
-  isToday,
-  parseISO
+  isToday
 } from 'date-fns'
 import { useAirac } from '@/hooks/useAirac'
 import type { AiracCycle } from '@/types/airac'
@@ -39,7 +35,6 @@ export function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedCycle, setSelectedCycle] = useState<AiracCycle | null>(null)
   const [showExportMenu, setShowExportMenu] = useState(false)
-  const [copied, setCopied] = useState(false)
 
   // Get calendar days for the current month
   const calendarDays = useMemo(() => {
@@ -83,8 +78,8 @@ export function CalendarPage() {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      // No need to set copied state as we removed it
+      setTimeout(() => {}, 2000)
     } catch (err) {
       console.error('Failed to copy: ', err)
     }

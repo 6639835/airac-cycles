@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { 
   Calendar, 
-  Clock, 
   ArrowLeft, 
-  Download,
   Share2,
   Bookmark,
   BookmarkCheck,
@@ -27,8 +25,7 @@ import { useTheme } from '@/contexts/ThemeContext'
 
 export function CycleDetailPage() {
   const { cycleId } = useParams<{ cycleId: string }>()
-  const navigate = useNavigate()
-  const { allCycles, stats } = useAirac()
+  const { allCycles } = useAirac()
   const { isDark } = useTheme()
   
   const [cycle, setCycle] = useState<AiracCycle | null>(null)

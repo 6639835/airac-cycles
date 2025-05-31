@@ -12,8 +12,6 @@ import {
   Heart,
   Github,
   Mail,
-  ExternalLink,
-  Info,
   AlertTriangle,
   CheckCircle,
   Send,
