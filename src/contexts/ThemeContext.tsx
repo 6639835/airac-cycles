@@ -6,6 +6,7 @@ interface ThemeContextType {
   theme: Theme
   toggleTheme: () => void
   setTheme: (theme: Theme) => void
+  isDark: boolean
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
@@ -26,12 +27,29 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     
     if (theme === 'dark') {
       root.classList.add('dark')
+      root.style.setProperty('color-scheme', 'dark')
     } else {
       root.classList.remove('dark')
+      root.style.setProperty('color-scheme', 'light')
     }
     
     localStorage.setItem('theme', theme)
   }, [theme])
+
+  // Listen for system preference changes
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    
+    const handleChange = () => {
+      if (!localStorage.getItem('theme')) {
+        setThemeState(mediaQuery.matches ? 'dark' : 'light')
+      }
+    }
+    
+    mediaQuery.addEventListener('change', handleChange)
+    
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [])
 
   const toggleTheme = () => {
     setThemeState(prevTheme => prevTheme === 'light' ? 'dark' : 'light')
@@ -41,8 +59,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setThemeState(newTheme)
   }
 
+  const isDark = theme === 'dark'
+
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme, isDark }}>
       {children}
     </ThemeContext.Provider>
   )

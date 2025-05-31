@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect } from 'react'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { Layout } from '@/components/Layout'
@@ -24,12 +24,14 @@ function App() {
     <ThemeProvider>
       <Router>
         <ScrollToTop />
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
+        <AnimatePresence mode="wait">
           <Layout>
             <motion.div
+              key={location?.pathname}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
             >
               <Routes>
                 <Route path="/" element={<HomePage />} />
@@ -40,7 +42,7 @@ function App() {
               </Routes>
             </motion.div>
           </Layout>
-        </div>
+        </AnimatePresence>
       </Router>
     </ThemeProvider>
   )
