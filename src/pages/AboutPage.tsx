@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { 
   Plane, 
   Calendar, 
@@ -22,10 +23,13 @@ import {
   ChevronUp,
   Star,
   Code,
-  Coffee
+  Coffee,
+  ArrowRight
 } from 'lucide-react'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export function AboutPage() {
+  const { isDark } = useTheme()
   const [activeTab, setActiveTab] = useState('features')
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
   const [feedbackForm, setFeedbackForm] = useState({
@@ -144,28 +148,36 @@ export function AboutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className={`min-h-screen ${
+      isDark ? 'bg-dark-gradient' : 'bg-gradient-to-br from-neutral-50 to-neutral-100'
+    }`}>
+      <div className="subtle-noise" aria-hidden="true"></div>
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.4 }}
           className="text-center mb-12"
         >
           <div className="flex justify-center mb-6">
             <div className="relative">
-              <div className="absolute inset-0 bg-primary-500 rounded-2xl blur-2xl opacity-20"></div>
-              <div className="relative bg-gradient-to-br from-primary-500 to-primary-700 p-6 rounded-2xl">
+              <div className={`absolute inset-0 rounded-2xl blur-2xl opacity-20 ${
+                isDark ? 'bg-primary-500' : 'bg-primary-500'
+              }`}></div>
+              <div className={`relative p-6 rounded-2xl ${
+                isDark ? 'bg-gradient-to-br from-primary-600 to-primary-800 shadow-glow' : 'bg-gradient-to-br from-primary-500 to-primary-700'
+              }`}>
                 <Plane className="w-12 h-12 text-white" />
               </div>
             </div>
           </div>
           
-          <h1 className="text-4xl md:text-6xl font-bold text-gradient mb-4">
+          <h1 className="text-4xl md:text-6xl font-semibold text-gradient mb-4">
             About AIRAC Explorer
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed">
+          <p className="text-xl text-neutral-600 dark:text-neutral-300 max-w-4xl mx-auto leading-relaxed">
             A modern, comprehensive web application for exploring Aeronautical Information 
             Regulation and Control (AIRAC) cycles. Built for aviation professionals, pilots, 
             and enthusiasts who need reliable access to AIRAC date information.
@@ -173,15 +185,21 @@ export function AboutPage() {
           
           {/* Tab Navigation */}
           <div className="mt-8 flex justify-center">
-            <div className="flex bg-white dark:bg-gray-800 rounded-lg p-1 shadow-lg">
+            <div className={`flex rounded-lg p-1 ${
+              isDark ? 'bg-dark-100 border border-dark-accent' : 'bg-white shadow-medium'
+            }`}>
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center space-x-2 px-4 py-2 rounded transition-all duration-200 ${
                     activeTab === tab.id
-                      ? 'bg-primary-500 text-white shadow-md'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                      ? isDark 
+                        ? 'bg-primary-500 text-white shadow-glow' 
+                        : 'bg-primary-500 text-white shadow-medium'
+                      : isDark
+                        ? 'text-neutral-400 hover:text-neutral-300' 
+                        : 'text-neutral-600 hover:text-neutral-900'
                   }`}
                 >
                   <tab.icon className="w-4 h-4" />
@@ -197,426 +215,515 @@ export function AboutPage() {
           key={activeTab}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.4 }}
         >
+          {/* Features Tab */}
           {activeTab === 'features' && (
-            <div className="space-y-12">
-              {/* What is AIRAC */}
-              <div className="card">
-                <div className="p-8">
-                  <div className="flex items-center space-x-3 mb-6">
-                    <div className="bg-accent-500 p-3 rounded-xl">
-                      <Info className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                        What is AIRAC?
-                      </h2>
-                      <p className="text-gray-600 dark:text-gray-400">
-                        Understanding the global aviation standard
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="space-y-4">
-                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                        <strong>AIRAC (Aeronautical Information Regulation and Control)</strong> is a 
-                        standardized system established by the International Civil Aviation Organization 
-                        (ICAO) to ensure synchronized worldwide updates of aeronautical information.
-                      </p>
-                      
-                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                        The system operates on a fixed 28-day cycle, with 13 cycles per year. This 
-                        ensures that critical navigation data, procedure changes, and airport information 
-                        are updated simultaneously across the globe, maintaining safety and consistency 
-                        in international aviation.
-                      </p>
-                    </div>
-
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        Key AIRAC Facts
-                      </h3>
-                      <div className="space-y-3">
-                        {airacFacts.map((fact, index) => (
-                          <motion.div 
-                            key={index}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.1 }}
-                            className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                          >
-                            <div className="flex items-center space-x-3">
-                              <span className="text-lg">{fact.icon}</span>
-                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {fact.label}
-                              </span>
-                            </div>
-                            <span className="text-sm text-gray-900 dark:text-white font-semibold">
-                              {fact.value}
-                            </span>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+            <div>
+              <div className="mb-12 text-center">
+                <h2 className="text-3xl font-semibold text-neutral-800 dark:text-white mb-4">
+                  Key <span className="text-gradient">Features</span>
+                </h2>
+                <p className="text-lg text-neutral-600 dark:text-neutral-300 max-w-3xl mx-auto">
+                  AIRAC Explorer provides a comprehensive suite of tools for aviation professionals
+                  to track, visualize, and understand AIRAC cycles.
+                </p>
               </div>
-
-              {/* Features Grid */}
-              <div>
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                    Modern Features
-                  </h2>
-                  <p className="text-xl text-gray-600 dark:text-gray-400">
-                    Built with cutting-edge technology for the modern aviation industry
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {features.map((feature, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: index * 0.1 }}
-                      className="card-hover group"
-                    >
-                      <div className="p-6">
-                        <div className="flex items-center space-x-3 mb-4">
-                          <div className="bg-primary-500 p-2 rounded-lg group-hover:scale-110 transition-transform duration-200">
-                            <feature.icon className="w-5 h-5 text-white" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                              {feature.title}
-                            </h3>
-                            <div className="text-xs text-primary-600 dark:text-primary-400 font-medium">
-                              {feature.highlight}
-                            </div>
-                          </div>
-                        </div>
-                        <p className="text-gray-600 dark:text-gray-400">
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                {features.map((feature, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    className={`p-6 rounded-xl ${
+                      isDark ? 'bg-dark-100 border border-dark-accent' : 'bg-white shadow-medium'
+                    }`}
+                  >
+                    <div className="flex items-start mb-4">
+                      <div className={`p-3 rounded-lg mr-4 ${
+                        isDark ? 'bg-dark-accent text-primary-400' : 'bg-primary-50 text-primary-500'
+                      }`}>
+                        <feature.icon className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold text-neutral-800 dark:text-white mb-1">
+                          {feature.title}
+                        </h3>
+                        <p className="text-neutral-600 dark:text-neutral-400">
                           {feature.description}
                         </p>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-neutral-100 dark:border-dark-accent">
+                      <div className={`text-center px-3 py-1.5 rounded-lg text-sm font-medium ${
+                        isDark ? 'bg-dark-accent text-primary-400' : 'bg-primary-50 text-primary-500'
+                      }`}>
+                        {feature.highlight}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+              
+              <div className={`p-8 rounded-xl mb-12 ${
+                isDark ? 'bg-dark-100 border border-dark-accent' : 'bg-white shadow-medium'
+              }`}>
+                <h3 className="text-2xl font-semibold text-neutral-800 dark:text-white mb-6">
+                  About AIRAC
+                </h3>
+                <p className="text-neutral-600 dark:text-neutral-400 mb-6">
+                  AIRAC (Aeronautical Information Regulation And Control) is a system used in aviation to ensure 
+                  synchronized worldwide updates of aeronautical information. It provides a standardized 28-day 
+                  cycle for changes to aeronautical information, maps, and charts to ensure safety and consistency 
+                  in international aviation operations.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {airacFacts.map((fact, index) => (
+                    <div 
+                      key={index}
+                      className={`p-4 rounded-lg ${
+                        isDark ? 'bg-dark-accent/50' : 'bg-neutral-50'
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <div className="text-2xl mr-3">{fact.icon}</div>
+                        <div>
+                          <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                            {fact.label}
+                          </div>
+                          <div className="font-medium text-neutral-800 dark:text-white">
+                            {fact.value}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="flex justify-center mb-12">
+                <Link 
+                  to="/" 
+                  className={`inline-flex items-center px-6 py-3 rounded-lg font-medium ${
+                    isDark ? 'bg-primary-500 text-white shadow-glow hover:bg-primary-600' : 'bg-primary-500 text-white shadow-medium hover:bg-primary-600'
+                  }`}
+                >
+                  Explore AIRAC Cycles
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* Technical Tab */}
+          {activeTab === 'technical' && (
+            <div>
+              <div className="mb-12 text-center">
+                <h2 className="text-3xl font-semibold text-neutral-800 dark:text-white mb-4">
+                  Technical <span className="text-gradient">Specifications</span>
+                </h2>
+                <p className="text-lg text-neutral-600 dark:text-neutral-300 max-w-3xl mx-auto">
+                  AIRAC Explorer is built with modern web technologies for optimal performance,
+                  reliability, and user experience.
+                </p>
+              </div>
+              
+              <div className={`p-8 rounded-xl mb-12 ${
+                isDark ? 'bg-dark-100 border border-dark-accent' : 'bg-white shadow-medium'
+              }`}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {technicalSpecs.map((spec, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                      className={`flex items-center p-4 rounded-lg ${
+                        isDark ? 'bg-dark-accent/50' : 'bg-neutral-50'
+                      }`}
+                    >
+                      <div className="text-2xl mr-4">{spec.icon}</div>
+                      <div>
+                        <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                          {spec.label}
+                        </div>
+                        <div className="font-medium text-neutral-800 dark:text-white">
+                          {spec.value}
+                        </div>
                       </div>
                     </motion.div>
                   ))}
                 </div>
               </div>
-            </div>
-          )}
-
-          {activeTab === 'technical' && (
-            <div className="space-y-8">
-              <div className="card">
-                <div className="p-8">
-                  <div className="flex items-center space-x-3 mb-6">
-                    <div className="bg-green-500 p-3 rounded-xl">
-                      <Code className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                        Technical Specifications
-                      </h2>
-                      <p className="text-gray-600 dark:text-gray-400">
-                        Modern web technologies for optimal performance
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {technicalSpecs.map((spec, index) => (
-                      <motion.div 
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <span className="text-lg">{spec.icon}</span>
-                          <span className="font-medium text-gray-700 dark:text-gray-300">
-                            {spec.label}
-                          </span>
-                        </div>
-                        <span className="text-gray-900 dark:text-white font-semibold text-right max-w-xs">
-                          {spec.value}
-                        </span>
-                      </motion.div>
-                    ))}
+              
+              <div className={`p-8 rounded-xl mb-12 ${
+                isDark ? 'bg-dark-100 border border-dark-accent' : 'bg-white shadow-medium'
+              }`}>
+                <h3 className="text-2xl font-semibold text-neutral-800 dark:text-white mb-6">
+                  Design Philosophy
+                </h3>
+                <div className="space-y-4 text-neutral-600 dark:text-neutral-400">
+                  <p>
+                    AIRAC Explorer was designed with a focus on clean, minimalist design that prioritizes
+                    data clarity and user experience. The interface follows a consistent design language
+                    across all components with attention to typography, spacing, and color harmony.
+                  </p>
+                  <p>
+                    The application features a responsive layout that works seamlessly across desktop,
+                    tablet, and mobile devices. Dark mode support ensures comfortable viewing in all
+                    lighting conditions and reduces eye strain during night operations.
+                  </p>
+                  <p>
+                    Performance optimization techniques such as code splitting, lazy loading, and
+                    memoization are employed to ensure fast load times and smooth interactions
+                    even when dealing with large datasets.
+                  </p>
+                </div>
+              </div>
+              
+              <div className={`p-5 rounded-xl mb-12 ${
+                isDark ? 'bg-dark-accent/50' : 'bg-amber-50 dark:bg-amber-900/20'
+              }`}>
+                <div className="flex items-start">
+                  <AlertTriangle className={`w-5 h-5 mt-0.5 mr-3 ${
+                    isDark ? 'text-amber-400' : 'text-amber-500'
+                  }`} />
+                  <div>
+                    <h4 className={`text-sm font-medium mb-1 ${
+                      isDark ? 'text-white' : 'text-amber-800 dark:text-amber-400'
+                    }`}>
+                      Important Notice
+                    </h4>
+                    <p className={`text-sm ${
+                      isDark ? 'text-neutral-300' : 'text-amber-700 dark:text-amber-300'
+                    }`}>
+                      While we strive for accuracy, this application is intended for reference and educational
+                      purposes only. For operational aviation use, always refer to official sources and
+                      approved navigation databases provided by your local aviation authority.
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
+          {/* FAQ Tab */}
           {activeTab === 'faq' && (
-            <div className="space-y-6">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                  Frequently Asked Questions
+            <div>
+              <div className="mb-12 text-center">
+                <h2 className="text-3xl font-semibold text-neutral-800 dark:text-white mb-4">
+                  Frequently Asked <span className="text-gradient">Questions</span>
                 </h2>
-                <p className="text-xl text-gray-600 dark:text-gray-400">
-                  Common questions about AIRAC and this application
+                <p className="text-lg text-neutral-600 dark:text-neutral-300 max-w-3xl mx-auto">
+                  Find answers to common questions about AIRAC cycles and how to use this application.
                 </p>
               </div>
-
-              <div className="space-y-4">
-                {faqItems.map((item, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="card border border-gray-200 dark:border-gray-700"
-                  >
-                    <button
-                      onClick={() => toggleFaq(index)}
-                      className="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                    >
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {item.question}
-                      </h3>
-                      {expandedFaq === index ? (
-                        <ChevronUp className="w-5 h-5 text-gray-400" />
-                      ) : (
-                        <ChevronDown className="w-5 h-5 text-gray-400" />
-                      )}
-                    </button>
-                    {expandedFaq === index && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="px-6 pb-6"
+              
+              <div className={`rounded-xl overflow-hidden mb-12 ${
+                isDark ? 'bg-dark-100 border border-dark-accent' : 'bg-white shadow-medium'
+              }`}>
+                <div className="divide-y divide-neutral-100 dark:divide-dark-accent">
+                  {faqItems.map((item, index) => (
+                    <div key={index} className="relative">
+                      <button
+                        onClick={() => toggleFaq(index)}
+                        className={`w-full text-left p-6 flex items-center justify-between ${
+                          expandedFaq === index
+                            ? isDark ? 'bg-dark-accent/30' : 'bg-neutral-50'
+                            : ''
+                        }`}
                       >
-                        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                          <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                        <h3 className="text-lg font-medium text-neutral-800 dark:text-white pr-8">
+                          {item.question}
+                        </h3>
+                        {expandedFaq === index ? (
+                          <ChevronUp className={`w-5 h-5 flex-shrink-0 ${
+                            isDark ? 'text-neutral-400' : 'text-neutral-500'
+                          }`} />
+                        ) : (
+                          <ChevronDown className={`w-5 h-5 flex-shrink-0 ${
+                            isDark ? 'text-neutral-400' : 'text-neutral-500'
+                          }`} />
+                        )}
+                      </button>
+                      
+                      {expandedFaq === index && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="px-6 pb-6"
+                        >
+                          <p className="text-neutral-600 dark:text-neutral-400">
                             {item.answer}
                           </p>
-                        </div>
-                      </motion.div>
-                    )}
-                  </motion.div>
-                ))}
+                        </motion.div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className={`p-6 rounded-xl mb-12 ${
+                isDark ? 'bg-dark-100 border border-dark-accent' : 'bg-white shadow-medium'
+              }`}>
+                <div className="flex items-center space-x-4 mb-4">
+                  <HelpCircle className="w-6 h-6 text-primary-500 dark:text-primary-400" />
+                  <h3 className="text-xl font-medium text-neutral-800 dark:text-white">
+                    Still have questions?
+                  </h3>
+                </div>
+                <p className="text-neutral-600 dark:text-neutral-400 mb-4">
+                  If you couldn't find the answer to your question, feel free to reach out using
+                  the feedback form. We're here to help!
+                </p>
+                <button
+                  onClick={() => setActiveTab('feedback')}
+                  className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium ${
+                    isDark 
+                      ? 'bg-primary-500 text-white hover:bg-primary-600' 
+                      : 'bg-primary-500 text-white hover:bg-primary-600'
+                  }`}
+                >
+                  Contact Us
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </button>
               </div>
             </div>
           )}
 
+          {/* Feedback Tab */}
           {activeTab === 'feedback' && (
-            <div className="space-y-8">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                  We Value Your Feedback
+            <div>
+              <div className="mb-12 text-center">
+                <h2 className="text-3xl font-semibold text-neutral-800 dark:text-white mb-4">
+                  Share Your <span className="text-gradient">Feedback</span>
                 </h2>
-                <p className="text-xl text-gray-600 dark:text-gray-400">
-                  Help us improve AIRAC Explorer with your suggestions and comments
+                <p className="text-lg text-neutral-600 dark:text-neutral-300 max-w-3xl mx-auto">
+                  We value your input! Let us know what you think about AIRAC Explorer or
+                  suggest features that would help improve your experience.
                 </p>
               </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="card">
-                  <div className="p-8">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-                      Share Your Thoughts
-                    </h3>
-                    
+              
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-12">
+                <div className="lg:col-span-3">
+                  <div className={`p-8 rounded-xl ${
+                    isDark ? 'bg-dark-100 border border-dark-accent' : 'bg-white shadow-medium'
+                  }`}>
                     {feedbackSubmitted ? (
                       <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         className="text-center py-8"
                       >
-                        <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                          Thank you for your feedback!
-                        </h4>
-                        <p className="text-gray-600 dark:text-gray-400">
-                          We appreciate your input and will use it to improve the application.
+                        <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-500" />
+                        <h3 className="text-2xl font-semibold text-neutral-800 dark:text-white mb-2">
+                          Thank You!
+                        </h3>
+                        <p className="text-neutral-600 dark:text-neutral-400">
+                          Your feedback has been submitted successfully.
                         </p>
                       </motion.div>
                     ) : (
-                      <form onSubmit={handleFeedbackSubmit} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <input
-                            type="text"
-                            placeholder="Your Name"
-                            value={feedbackForm.name}
-                            onChange={(e) => setFeedbackForm(prev => ({ ...prev, name: e.target.value }))}
-                            className="input"
-                            required
-                          />
-                          <input
-                            type="email"
-                            placeholder="Your Email (optional)"
-                            value={feedbackForm.email}
-                            onChange={(e) => setFeedbackForm(prev => ({ ...prev, email: e.target.value }))}
-                            className="input"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            How would you rate this application?
-                          </label>
-                          <div className="flex space-x-2">
-                            {[1, 2, 3, 4, 5].map((rating) => (
-                              <button
-                                key={rating}
-                                type="button"
-                                onClick={() => setFeedbackForm(prev => ({ ...prev, rating }))}
-                                className={`p-2 rounded transition-colors ${
-                                  rating <= feedbackForm.rating
-                                    ? 'text-yellow-500'
-                                    : 'text-gray-300 dark:text-gray-600'
-                                }`}
-                              >
-                                <Star className="w-6 h-6 fill-current" />
-                              </button>
-                            ))}
+                      <form onSubmit={handleFeedbackSubmit}>
+                        <div className="space-y-6">
+                          <div>
+                            <label 
+                              htmlFor="name" 
+                              className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1"
+                            >
+                              Name
+                            </label>
+                            <input
+                              type="text"
+                              id="name"
+                              value={feedbackForm.name}
+                              onChange={(e) => setFeedbackForm({ ...feedbackForm, name: e.target.value })}
+                              className="input w-full"
+                              placeholder="Your name"
+                            />
+                          </div>
+                          
+                          <div>
+                            <label 
+                              htmlFor="email" 
+                              className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1"
+                            >
+                              Email
+                            </label>
+                            <input
+                              type="email"
+                              id="email"
+                              value={feedbackForm.email}
+                              onChange={(e) => setFeedbackForm({ ...feedbackForm, email: e.target.value })}
+                              className="input w-full"
+                              placeholder="your.email@example.com"
+                            />
+                          </div>
+                          
+                          <div>
+                            <label 
+                              htmlFor="message" 
+                              className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1"
+                            >
+                              Message
+                            </label>
+                            <textarea
+                              id="message"
+                              rows={5}
+                              value={feedbackForm.message}
+                              onChange={(e) => setFeedbackForm({ ...feedbackForm, message: e.target.value })}
+                              className="input w-full"
+                              placeholder="Your feedback or questions..."
+                            />
+                          </div>
+                          
+                          <div>
+                            <label 
+                              className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2"
+                            >
+                              Rate your experience
+                            </label>
+                            <div className="flex items-center space-x-1">
+                              {[1, 2, 3, 4, 5].map((rating) => (
+                                <button
+                                  key={rating}
+                                  type="button"
+                                  onClick={() => setFeedbackForm({ ...feedbackForm, rating })}
+                                  className="focus:outline-none"
+                                >
+                                  <Star className={`w-6 h-6 ${
+                                    rating <= feedbackForm.rating
+                                      ? 'text-amber-400 fill-amber-400'
+                                      : isDark ? 'text-neutral-600' : 'text-neutral-300'
+                                  }`} />
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <button
+                              type="submit"
+                              className={`w-full flex items-center justify-center px-6 py-3 rounded-lg font-medium ${
+                                isDark 
+                                  ? 'bg-primary-500 text-white shadow-glow hover:bg-primary-600' 
+                                  : 'bg-primary-500 text-white shadow-medium hover:bg-primary-600'
+                              }`}
+                            >
+                              <Send className="w-4 h-4 mr-2" />
+                              Submit Feedback
+                            </button>
                           </div>
                         </div>
-                        
-                        <textarea
-                          placeholder="Your feedback, suggestions, or comments..."
-                          value={feedbackForm.message}
-                          onChange={(e) => setFeedbackForm(prev => ({ ...prev, message: e.target.value }))}
-                          className="input h-32 resize-none"
-                          required
-                        />
-                        
-                        <button
-                          type="submit"
-                          className="btn-primary w-full flex items-center justify-center space-x-2"
-                        >
-                          <Send className="w-4 h-4" />
-                          <span>Submit Feedback</span>
-                        </button>
                       </form>
                     )}
                   </div>
                 </div>
-
-                <div className="space-y-6">
-                  <div className="card">
-                    <div className="p-6">
-                      <div className="flex items-center space-x-3 mb-4">
-                        <div className="bg-primary-500 p-2 rounded-lg">
-                          <Github className="w-5 h-5 text-white" />
+                
+                <div className="lg:col-span-2">
+                  <div className={`p-6 rounded-xl mb-6 ${
+                    isDark ? 'bg-dark-100 border border-dark-accent' : 'bg-white shadow-medium'
+                  }`}>
+                    <h3 className="text-lg font-medium text-neutral-800 dark:text-white mb-4">
+                      Contact Information
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="flex items-start">
+                        <Mail className="w-5 h-5 text-primary-500 dark:text-primary-400 mt-0.5 mr-3" />
+                        <div>
+                          <div className="text-sm font-medium text-neutral-800 dark:text-white">
+                            Email
+                          </div>
+                          <a 
+                            href="mailto:support@airac-explorer.com" 
+                            className="text-neutral-600 dark:text-neutral-400 hover:text-primary-500 dark:hover:text-primary-400"
+                          >
+                            support@airac-explorer.com
+                          </a>
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                          Open Source
-                        </h3>
                       </div>
-                      <p className="text-gray-600 dark:text-gray-400 mb-4">
-                        This project is open source. Contribute, report issues, or suggest features on GitHub.
-                      </p>
-                      <button className="btn-secondary flex items-center space-x-2">
-                        <Github className="w-4 h-4" />
-                        <span>View on GitHub</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </button>
+                      
+                      <div className="flex items-start">
+                        <Github className="w-5 h-5 text-primary-500 dark:text-primary-400 mt-0.5 mr-3" />
+                        <div>
+                          <div className="text-sm font-medium text-neutral-800 dark:text-white">
+                            GitHub
+                          </div>
+                          <a 
+                            href="https://github.com/airac-explorer" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-neutral-600 dark:text-neutral-400 hover:text-primary-500 dark:hover:text-primary-400"
+                          >
+                            github.com/airac-explorer
+                          </a>
+                        </div>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="card">
-                    <div className="p-6">
-                      <div className="flex items-center space-x-3 mb-4">
-                        <div className="bg-blue-500 p-2 rounded-lg">
-                          <Mail className="w-5 h-5 text-white" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                          Contact Us
-                        </h3>
-                      </div>
-                      <p className="text-gray-600 dark:text-gray-400 mb-4">
-                        Have questions or need support? Get in touch with our team.
-                      </p>
-                      <button className="btn-secondary flex items-center space-x-2">
-                        <Mail className="w-4 h-4" />
-                        <span>Send Email</span>
-                      </button>
+                  
+                  <div className={`p-6 rounded-xl ${
+                    isDark ? 'bg-dark-100 border border-dark-accent' : 'bg-white shadow-medium'
+                  }`}>
+                    <div className="flex items-center mb-4">
+                      <Coffee className="w-5 h-5 text-primary-500 dark:text-primary-400 mr-3" />
+                      <h3 className="text-lg font-medium text-neutral-800 dark:text-white">
+                        Support the Project
+                      </h3>
                     </div>
-                  </div>
-
-                  <div className="card">
-                    <div className="p-6">
-                      <div className="flex items-center space-x-3 mb-4">
-                        <div className="bg-yellow-500 p-2 rounded-lg">
-                          <Coffee className="w-5 h-5 text-white" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                          Support Development
-                        </h3>
-                      </div>
-                      <p className="text-gray-600 dark:text-gray-400 mb-4">
-                        Enjoy using AIRAC Explorer? Consider supporting its development.
-                      </p>
-                      <button className="btn-secondary flex items-center space-x-2">
-                        <Heart className="w-4 h-4 text-red-500" />
-                        <span>Buy us a coffee</span>
-                      </button>
-                    </div>
+                    <p className="text-neutral-600 dark:text-neutral-400 mb-4">
+                      If you find AIRAC Explorer useful, consider supporting the project.
+                      Your contribution helps maintain and improve this free tool.
+                    </p>
+                    <a 
+                      href="#" 
+                      className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium ${
+                        isDark 
+                          ? 'bg-amber-500 text-white hover:bg-amber-600' 
+                          : 'bg-amber-500 text-white hover:bg-amber-600'
+                      }`}
+                    >
+                      <Heart className="w-4 h-4 mr-2" />
+                      Buy us a coffee
+                    </a>
                   </div>
                 </div>
               </div>
             </div>
           )}
         </motion.div>
-
-        {/* Important Notice - Always visible */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          className="card mt-12 border-l-4 border-l-yellow-500"
-        >
-          <div className="p-8">
-            <div className="flex items-center space-x-3 mb-6">
-              <div className="bg-yellow-500 p-3 rounded-xl">
-                <AlertTriangle className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Important Notice
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400">
-                  For operational aviation use
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 p-6 rounded-lg">
-              <p className="text-gray-800 dark:text-gray-200 leading-relaxed mb-4">
-                <strong>This application is designed for reference and educational purposes.</strong> 
-                While we strive for accuracy, for actual operational use in aviation, always refer 
-                to official aviation authority sources such as:
-              </p>
-              
-              <ul className="space-y-2 text-gray-700 dark:text-gray-300">
-                <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                  <span>International Civil Aviation Organization (ICAO)</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                  <span>Federal Aviation Administration (FAA)</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                  <span>European Union Aviation Safety Agency (EASA)</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                  <span>Your local civil aviation authority</span>
-                </li>
-              </ul>
-            </div>
+        
+        {/* Footer */}
+        <div className="mt-12 pt-8 border-t border-neutral-200 dark:border-dark-accent text-center">
+          <p className="text-neutral-600 dark:text-neutral-400">
+            &copy; {new Date().getFullYear()} AIRAC Explorer. All rights reserved.
+          </p>
+          <div className="flex justify-center mt-4 space-x-4">
+            <Link 
+              to="/" 
+              className="text-neutral-600 dark:text-neutral-400 hover:text-primary-500 dark:hover:text-primary-400"
+            >
+              Home
+            </Link>
+            <Link 
+              to="/calendar" 
+              className="text-neutral-600 dark:text-neutral-400 hover:text-primary-500 dark:hover:text-primary-400"
+            >
+              Calendar
+            </Link>
+            <Link 
+              to="/analytics" 
+              className="text-neutral-600 dark:text-neutral-400 hover:text-primary-500 dark:hover:text-primary-400"
+            >
+              Analytics
+            </Link>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   )

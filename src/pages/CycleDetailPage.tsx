@@ -17,16 +17,19 @@ import {
   Copy,
   Check,
   PrinterIcon,
-  ExternalLink
+  ExternalLink,
+  AlertTriangle
 } from 'lucide-react'
 import { format, differenceInDays } from 'date-fns'
 import { useAirac } from '@/hooks/useAirac'
 import type { AiracCycle } from '@/types/airac'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export function CycleDetailPage() {
   const { cycleId } = useParams<{ cycleId: string }>()
   const navigate = useNavigate()
   const { allCycles, stats } = useAirac()
+  const { isDark } = useTheme()
   
   const [cycle, setCycle] = useState<AiracCycle | null>(null)
   const [isBookmarked, setIsBookmarked] = useState(false)
@@ -67,19 +70,32 @@ export function CycleDetailPage() {
 
   if (!cycle) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+      <div className={`min-h-screen flex items-center justify-center ${
+        isDark ? 'bg-dark-gradient' : 'bg-gradient-to-br from-neutral-50 to-neutral-100'
+      }`}>
+        <div className="subtle-noise" aria-hidden="true"></div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className={`max-w-md p-8 rounded-xl text-center ${
+            isDark ? 'bg-dark-100 border border-dark-accent shadow-dark-medium' : 'bg-white shadow-medium'
+          }`}
+        >
+          <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-amber-500" />
+          <h1 className="text-2xl font-semibold text-neutral-800 dark:text-white mb-4">
             Cycle Not Found
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            The requested AIRAC cycle could not be found.
+          <p className="text-neutral-600 dark:text-neutral-400 mb-6">
+            The requested AIRAC cycle could not be found or does not exist.
           </p>
-          <Link to="/" className="btn-primary">
+          <Link to="/" className={`btn-primary inline-flex items-center justify-center ${
+            isDark ? 'shadow-glow' : ''
+          }`}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Home
           </Link>
-        </div>
+        </motion.div>
       </div>
     )
   }
@@ -202,73 +218,177 @@ END:VCALENDAR`
   })()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className={`min-h-screen ${
+      isDark ? 'bg-dark-gradient' : 'bg-gradient-to-br from-neutral-50 to-neutral-100'
+    }`}>
+      <div className="subtle-noise" aria-hidden="true"></div>
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Navigation */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="flex items-center justify-between mb-8"
-        >
-          <button
-            onClick={() => navigate(-1)}
-            className="btn-secondary flex items-center space-x-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back</span>
-          </button>
-
-          <div className="flex items-center space-x-2">
-            {previousCycle && (
-              <Link
-                to={`/cycle/${previousCycle.id}`}
-                className="btn-secondary p-2"
-                title={`Previous: ${previousCycle.cycle}`}
+        {/* Breadcrumb & Actions */}
+        <div className="mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Link 
+                to="/"
+                className={`inline-flex items-center text-sm font-medium mb-2 focus-ring rounded-lg ${
+                  isDark ? 'text-neutral-300 hover:text-white' : 'text-neutral-600 hover:text-neutral-900'
+                }`}
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                <span>Back to all cycles</span>
               </Link>
-            )}
+              <h1 className="text-3xl font-semibold text-neutral-900 dark:text-white">
+                AIRAC Cycle <span className="text-primary-500 dark:text-primary-400">{cycle.cycle}</span>
+              </h1>
+            </motion.div>
             
-            {nextCycle && (
-              <Link
-                to={`/cycle/${nextCycle.id}`}
-                className="btn-secondary p-2"
-                title={`Next: ${nextCycle.cycle}`}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              className="flex items-center space-x-2 no-print"
+            >
+              <button
+                onClick={toggleBookmark}
+                className={`p-2 rounded-lg transition-all duration-200 ${
+                  isBookmarked 
+                    ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' 
+                    : isDark 
+                      ? 'bg-dark-accent text-neutral-400 hover:text-neutral-300' 
+                      : 'bg-white text-neutral-500 hover:text-neutral-700 shadow-soft'
+                }`}
+                title={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
               >
-                <ChevronRight className="w-4 h-4" />
-              </Link>
-            )}
+                {isBookmarked ? <BookmarkCheck className="w-5 h-5" /> : <Bookmark className="w-5 h-5" />}
+              </button>
+              
+              <div className="relative">
+                <button
+                  onClick={() => setShareMenuOpen(!shareMenuOpen)}
+                  className={`p-2 rounded-lg transition-all duration-200 ${
+                    isDark 
+                      ? 'bg-dark-accent text-neutral-400 hover:text-neutral-300' 
+                      : 'bg-white text-neutral-500 hover:text-neutral-700 shadow-soft'
+                  }`}
+                  title="Share"
+                >
+                  <Share2 className="w-5 h-5" />
+                </button>
+                
+                {shareMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    className={`absolute right-0 top-12 w-64 z-10 rounded-xl py-2 ${
+                      isDark ? 'bg-dark-100 border border-dark-accent shadow-dark-medium' : 'bg-white shadow-medium'
+                    }`}
+                  >
+                    <div className="px-3 py-2 border-b border-neutral-100 dark:border-dark-accent">
+                      <div className="text-sm font-medium text-neutral-800 dark:text-white">Share Cycle</div>
+                    </div>
+                    <div className="p-3">
+                      <div className="flex items-center mb-2">
+                        <input
+                          type="text"
+                          readOnly
+                          value={shareUrl}
+                          className="input text-xs py-1.5 h-auto"
+                          onClick={(e) => e.currentTarget.select()}
+                        />
+                        <button
+                          onClick={() => copyToClipboard(shareUrl)}
+                          className={`p-1.5 rounded ml-1 ${
+                            isDark ? 'bg-dark-accent hover:bg-primary-900/30' : 'bg-neutral-100 hover:bg-neutral-200'
+                          }`}
+                        >
+                          {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-neutral-500" />}
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 mt-3">
+                        <button
+                          onClick={() => exportData('json')}
+                          className={`p-2 rounded-lg text-xs font-medium ${
+                            isDark 
+                              ? 'bg-dark-accent text-neutral-300 hover:bg-dark-accent/70' 
+                              : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                          }`}
+                        >
+                          JSON
+                        </button>
+                        <button
+                          onClick={() => exportData('csv')}
+                          className={`p-2 rounded-lg text-xs font-medium ${
+                            isDark 
+                              ? 'bg-dark-accent text-neutral-300 hover:bg-dark-accent/70' 
+                              : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                          }`}
+                        >
+                          CSV
+                        </button>
+                        <button
+                          onClick={() => exportData('ical')}
+                          className={`p-2 rounded-lg text-xs font-medium ${
+                            isDark 
+                              ? 'bg-dark-accent text-neutral-300 hover:bg-dark-accent/70' 
+                              : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                          }`}
+                        >
+                          iCal
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+              
+              <button
+                onClick={printPage}
+                className={`p-2 rounded-lg transition-all duration-200 ${
+                  isDark 
+                    ? 'bg-dark-accent text-neutral-400 hover:text-neutral-300' 
+                    : 'bg-white text-neutral-500 hover:text-neutral-700 shadow-soft'
+                }`}
+                title="Print"
+              >
+                <PrinterIcon className="w-5 h-5" />
+              </button>
+            </motion.div>
           </div>
-        </motion.div>
-
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="card mb-8 relative overflow-hidden"
-        >
-          {cycle.isCurrent && (
-            <div className="absolute inset-0 bg-gradient-to-r from-primary-500/10 to-accent-500/10" />
-          )}
-          
-          <div className="relative p-8">
-            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-              <div className="flex items-center space-x-6">
-                <div className="bg-primary-500 p-4 rounded-2xl">
-                  <Plane className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                    AIRAC {cycle.cycle}
-                  </h1>
-                  <p className="text-lg text-gray-600 dark:text-gray-400">
-                    Cycle {cycle.cycleNumber} of {cycle.year}
-                  </p>
-                  <div className="flex items-center space-x-4 mt-2">
+        </div>
+        
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+          {/* Cycle Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="lg:col-span-2"
+          >
+            <div className={`card overflow-hidden ${
+              cycle.isCurrent ? 'border-l-4 border-l-primary-500' : ''
+            }`}>
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <div className="text-sm text-neutral-500 dark:text-neutral-400 mb-1">
+                      AIRAC Cycle
+                    </div>
+                    <h2 className="text-3xl font-semibold text-primary-500 dark:text-primary-400">
+                      {cycle.cycle}
+                    </h2>
+                    <div className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+                      {cycle.year} &middot; Cycle {cycle.cycleNumber}
+                    </div>
+                  </div>
+                  
+                  <div>
                     {cycle.isCurrent && (
-                      <span className="badge-success">Current Cycle</span>
+                      <span className="badge-success">Current</span>
                     )}
                     {cycle.isUpcoming && (
                       <span className="badge-warning">Upcoming</span>
@@ -278,372 +398,368 @@ END:VCALENDAR`
                     )}
                   </div>
                 </div>
-              </div>
-
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={toggleBookmark}
-                  className="btn-secondary p-2"
-                  title={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
-                >
-                  {isBookmarked ? (
-                    <BookmarkCheck className="w-5 h-5 text-yellow-500" />
-                  ) : (
-                    <Bookmark className="w-5 h-5" />
-                  )}
-                </button>
-
-                <div className="relative">
-                  <button
-                    onClick={() => setShareMenuOpen(!shareMenuOpen)}
-                    className="btn-secondary p-2"
-                    title="Share"
-                  >
-                    <Share2 className="w-5 h-5" />
-                  </button>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className={`p-4 rounded-lg ${
+                    isDark ? 'bg-dark-accent/50' : 'bg-neutral-50'
+                  }`}>
+                    <div className="flex items-center space-x-3 mb-2">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        isDark ? 'bg-dark-accent' : 'bg-primary-50 dark:bg-primary-900/20'
+                      }`}>
+                        <Calendar className="w-5 h-5 text-primary-500 dark:text-primary-400" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-neutral-800 dark:text-white">
+                          Start Date
+                        </div>
+                        <div className="text-xl font-medium text-neutral-900 dark:text-white">
+                          {format(cycle.startDate, 'MMMM d, yyyy')}
+                        </div>
+                        <div className="text-xs text-neutral-500 dark:text-neutral-400">
+                          {format(cycle.startDate, 'EEEE')}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   
-                  {shareMenuOpen && (
+                  <div className={`p-4 rounded-lg ${
+                    isDark ? 'bg-dark-accent/50' : 'bg-neutral-50'
+                  }`}>
+                    <div className="flex items-center space-x-3 mb-2">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        isDark ? 'bg-dark-accent' : 'bg-primary-50 dark:bg-primary-900/20'
+                      }`}>
+                        <Calendar className="w-5 h-5 text-primary-500 dark:text-primary-400" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-neutral-800 dark:text-white">
+                          End Date
+                        </div>
+                        <div className="text-xl font-medium text-neutral-900 dark:text-white">
+                          {format(cycle.endDate, 'MMMM d, yyyy')}
+                        </div>
+                        <div className="text-xs text-neutral-500 dark:text-neutral-400">
+                          {format(cycle.endDate, 'EEEE')}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Cycle Progress */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                      {cycle.isCurrent 
+                        ? 'Current Progress' 
+                        : cycle.isUpcoming 
+                          ? 'Starts in the future' 
+                          : 'Complete'
+                      }
+                    </div>
+                    <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                      {Math.round(progressPercentage)}%
+                    </div>
+                  </div>
+                  
+                  <div className={`relative h-2 w-full rounded-full overflow-hidden ${
+                    isDark ? 'bg-dark-accent' : 'bg-neutral-100'
+                  }`}>
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="absolute right-0 top-12 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10 min-w-48"
-                    >
-                      <div className="p-2">
-                        <button
-                          onClick={() => copyToClipboard(shareUrl)}
-                          className="w-full flex items-center space-x-2 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-                        >
-                          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                          <span>{copied ? 'Copied!' : 'Copy URL'}</span>
-                        </button>
-                        <button
-                          onClick={() => window.open(`https://twitter.com/intent/tweet?text=AIRAC Cycle ${cycle.cycle}&url=${shareUrl}`, '_blank')}
-                          className="w-full flex items-center space-x-2 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          <span>Share on Twitter</span>
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
-
-                <button
-                  onClick={printPage}
-                  className="btn-secondary p-2"
-                  title="Print"
-                >
-                  <PrinterIcon className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Main Info */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Dates & Duration */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="card"
-            >
-              <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-                  Cycle Information
-                </h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <Calendar className="w-5 h-5 text-green-500" />
-                      <div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">Start Date</div>
-                        <div className="font-semibold text-gray-900 dark:text-white">
-                          {format(cycle.startDate, 'EEEE, MMMM dd, yyyy')}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {format(cycle.startDate, 'HH:mm')} UTC
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <Calendar className="w-5 h-5 text-red-500" />
-                      <div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">End Date</div>
-                        <div className="font-semibold text-gray-900 dark:text-white">
-                          {format(cycle.endDate, 'EEEE, MMMM dd, yyyy')}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {format(cycle.endDate, 'HH:mm')} UTC
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <Clock className="w-5 h-5 text-blue-500" />
-                      <div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">Duration</div>
-                        <div className="font-semibold text-gray-900 dark:text-white">
-                          {cycleDuration} days
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          Standard AIRAC cycle
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <BarChart3 className="w-5 h-5 text-purple-500" />
-                      <div className="flex-1">
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
-                          {cycle.isCurrent ? 'Progress' : cycle.isUpcoming ? 'Future Cycle' : 'Completed Cycle'}
-                        </div>
-                        <div className="font-semibold text-gray-900 dark:text-white">
-                          {Math.round(progressPercentage)}%
-                          {cycle.isCurrent && ' Complete'}
-                          {cycle.isUpcoming && ' (Not Started)'}
-                          {!cycle.isCurrent && !cycle.isUpcoming && ' (Finished)'}
-                        </div>
-                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1">
-                          <div 
-                            className={`h-2 rounded-full transition-all duration-500 ${
-                              cycle.isCurrent ? 'bg-purple-500' : 
-                              cycle.isUpcoming ? 'bg-yellow-500' : 'bg-green-500'
-                            }`}
-                            style={{ width: `${progressPercentage}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {cycle.isCurrent && (
-                  <div className="mt-6 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
-                    <div className="grid grid-cols-2 gap-4 text-center">
-                      <div>
-                        <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">
-                          {cycle.daysSinceStart || 0}
-                        </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
-                          Days Elapsed
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">
-                          {cycle.daysUntilEnd || 0}
-                        </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
-                          Days Remaining
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-
-            {/* Export Options */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="card"
-            >
-              <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-                  Export & Integration
-                </h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <button
-                    onClick={() => exportData('json')}
-                    className="btn-secondary flex items-center justify-center space-x-2"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>JSON</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => exportData('csv')}
-                    className="btn-secondary flex items-center justify-center space-x-2"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>CSV</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => exportData('ical')}
-                    className="btn-secondary flex items-center justify-center space-x-2"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>Calendar (.ics)</span>
-                  </button>
-                </div>
-                
-                <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">Direct URL:</div>
-                  <div className="flex items-center space-x-2">
-                    <code className="flex-1 px-2 py-1 bg-white dark:bg-gray-900 border rounded text-xs font-mono">
-                      {shareUrl}
-                    </code>
-                    <button
-                      onClick={() => copyToClipboard(shareUrl)}
-                      className="btn-secondary p-1"
-                      title="Copy URL"
-                    >
-                      {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Right Column - Context & Navigation */}
-          <div className="space-y-8">
-            {/* Quick Stats */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="card"
-            >
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Context
-                </h3>
-                
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Year</span>
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {cycle.year}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Cycle of Year</span>
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {cycle.cycleNumber} of 13
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Total Cycles</span>
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {stats.totalCycles}
-                    </span>
-                  </div>
-                  
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div 
-                      className="bg-accent-500 h-2 rounded-full"
-                      style={{ width: `${(cycle.cycleNumber / 13) * 100}%` }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progressPercentage}%` }}
+                      transition={{ duration: 1, delay: 0.2 }}
+                      className={`absolute top-0 left-0 h-full rounded-full ${
+                        cycle.isCurrent 
+                          ? isDark ? 'bg-primary-500 shadow-glow' : 'bg-primary-500'
+                          : cycle.isUpcoming 
+                            ? 'bg-amber-500' 
+                            : 'bg-neutral-500'
+                      }`}
                     />
                   </div>
                 </div>
+                
+                {/* Timing Information */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className={`p-4 rounded-lg ${
+                    isDark ? 'bg-dark-accent/50' : 'bg-neutral-50'
+                  }`}>
+                    <div className="text-sm text-neutral-500 dark:text-neutral-400 mb-1">
+                      Duration
+                    </div>
+                    <div className="text-2xl font-medium text-neutral-900 dark:text-white">
+                      {cycleDuration} days
+                    </div>
+                  </div>
+                  
+                  <div className={`p-4 rounded-lg ${
+                    isDark ? 'bg-dark-accent/50' : 'bg-neutral-50'
+                  }`}>
+                    <div className="text-sm text-neutral-500 dark:text-neutral-400 mb-1">
+                      {cycle.isCurrent ? 'Remaining' : cycle.isUpcoming ? 'Starts In' : 'Ended'}
+                    </div>
+                    <div className="text-2xl font-medium text-neutral-900 dark:text-white">
+                      {cycle.isCurrent 
+                        ? `${cycle.daysUntilEnd} days` 
+                        : cycle.isUpcoming 
+                          ? `${Math.abs(cycle.daysSinceStart || 0)} days` 
+                          : `${cycle.daysSinceStart || 0} days ago`
+                      }
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Cycle Navigation */}
+                <div className={`flex justify-between pt-4 ${
+                  isDark ? 'border-t border-dark-accent' : 'border-t border-neutral-100'
+                }`}>
+                  {previousCycle ? (
+                    <Link 
+                      to={`/cycle/${previousCycle.id}`} 
+                      className={`flex items-center text-sm font-medium ${
+                        isDark ? 'text-neutral-400 hover:text-white' : 'text-neutral-600 hover:text-neutral-900'
+                      }`}
+                    >
+                      <ChevronLeft className="w-4 h-4 mr-1" />
+                      <span>Previous: {previousCycle.cycle}</span>
+                    </Link>
+                  ) : (
+                    <div></div>
+                  )}
+                  
+                  {nextCycle && (
+                    <Link 
+                      to={`/cycle/${nextCycle.id}`} 
+                      className={`flex items-center text-sm font-medium ${
+                        isDark ? 'text-neutral-400 hover:text-white' : 'text-neutral-600 hover:text-neutral-900'
+                      }`}
+                    >
+                      <span>Next: {nextCycle.cycle}</span>
+                      <ChevronRight className="w-4 h-4 ml-1" />
+                    </Link>
+                  )}
+                </div>
               </div>
-            </motion.div>
-
-            {/* Related Cycles */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="card"
-            >
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            </div>
+          </motion.div>
+          
+          {/* Sidebar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+          >
+            <div className="space-y-6">
+              {/* Technical Details */}
+              <div className="card p-6">
+                <h3 className="text-lg font-medium text-neutral-800 dark:text-white mb-4">
+                  Technical Details
+                </h3>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-neutral-500 dark:text-neutral-400">ID</span>
+                    <span className="text-sm font-medium text-neutral-800 dark:text-white">{cycle.id}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-neutral-500 dark:text-neutral-400">Identifier</span>
+                    <span className="text-sm font-medium text-neutral-800 dark:text-white">{cycle.cycle}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-neutral-500 dark:text-neutral-400">Year</span>
+                    <span className="text-sm font-medium text-neutral-800 dark:text-white">{cycle.year}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-neutral-500 dark:text-neutral-400">Cycle Number</span>
+                    <span className="text-sm font-medium text-neutral-800 dark:text-white">{cycle.cycleNumber}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-neutral-500 dark:text-neutral-400">Status</span>
+                    <span className="text-sm font-medium text-neutral-800 dark:text-white">
+                      {cycle.isCurrent ? 'Current' : cycle.isUpcoming ? 'Upcoming' : 'Past'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Related Links */}
+              <div className="card p-6">
+                <h3 className="text-lg font-medium text-neutral-800 dark:text-white mb-4">
                   Navigation
                 </h3>
                 
                 <div className="space-y-3">
-                  {previousCycle && (
-                    <Link
-                      to={`/cycle/${previousCycle.id}`}
-                      className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      <ChevronLeft className="w-4 h-4 text-gray-400" />
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {previousCycle.cycle}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {format(previousCycle.startDate, 'MMM dd, yyyy')}
-                        </div>
-                      </div>
-                    </Link>
-                  )}
+                  <Link
+                    to="/"
+                    className={`flex items-center py-2 px-3 rounded-lg transition-colors ${
+                      isDark 
+                        ? 'bg-dark-accent text-neutral-300 hover:text-white' 
+                        : 'bg-neutral-50 text-neutral-700 hover:bg-neutral-100'
+                    }`}
+                  >
+                    <Plane className="w-4 h-4 mr-3" />
+                    <span className="text-sm font-medium">All Cycles</span>
+                  </Link>
                   
-                  {nextCycle && (
-                    <Link
-                      to={`/cycle/${nextCycle.id}`}
-                      className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {nextCycle.cycle}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {format(nextCycle.startDate, 'MMM dd, yyyy')}
-                        </div>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-gray-400" />
-                    </Link>
-                  )}
-                </div>
-                
-                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <Link
                     to="/calendar"
-                    className="btn-secondary w-full flex items-center justify-center space-x-2"
+                    className={`flex items-center py-2 px-3 rounded-lg transition-colors ${
+                      isDark 
+                        ? 'bg-dark-accent text-neutral-300 hover:text-white' 
+                        : 'bg-neutral-50 text-neutral-700 hover:bg-neutral-100'
+                    }`}
                   >
-                    <Calendar className="w-4 h-4" />
-                    <span>View in Calendar</span>
+                    <Calendar className="w-4 h-4 mr-3" />
+                    <span className="text-sm font-medium">Calendar View</span>
+                  </Link>
+                  
+                  <Link
+                    to="/analytics"
+                    className={`flex items-center py-2 px-3 rounded-lg transition-colors ${
+                      isDark 
+                        ? 'bg-dark-accent text-neutral-300 hover:text-white' 
+                        : 'bg-neutral-50 text-neutral-700 hover:bg-neutral-100'
+                    }`}
+                  >
+                    <BarChart3 className="w-4 h-4 mr-3" />
+                    <span className="text-sm font-medium">Analytics</span>
+                  </Link>
+                  
+                  <Link
+                    to="/about"
+                    className={`flex items-center py-2 px-3 rounded-lg transition-colors ${
+                      isDark 
+                        ? 'bg-dark-accent text-neutral-300 hover:text-white' 
+                        : 'bg-neutral-50 text-neutral-700 hover:bg-neutral-100'
+                    }`}
+                  >
+                    <Info className="w-4 h-4 mr-3" />
+                    <span className="text-sm font-medium">About AIRAC</span>
                   </Link>
                 </div>
               </div>
-            </motion.div>
-
-            {/* AIRAC Info */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className="card"
-            >
-              <div className="p-6">
-                <div className="flex items-center space-x-2 mb-4">
-                  <Info className="w-5 h-5 text-blue-500" />
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    About AIRAC
-                  </h3>
+              
+              {/* Information */}
+              <div className={`p-5 rounded-xl ${
+                isDark ? 'bg-dark-accent/50' : 'bg-amber-50 dark:bg-amber-900/20'
+              }`}>
+                <div className="flex items-start">
+                  <Info className={`w-5 h-5 mt-0.5 mr-3 ${
+                    isDark ? 'text-amber-400' : 'text-amber-500'
+                  }`} />
+                  <div>
+                    <h4 className={`text-sm font-medium mb-1 ${
+                      isDark ? 'text-white' : 'text-amber-800 dark:text-amber-400'
+                    }`}>
+                      Important Notice
+                    </h4>
+                    <p className={`text-xs ${
+                      isDark ? 'text-neutral-300' : 'text-amber-700 dark:text-amber-300'
+                    }`}>
+                      For operational use, always refer to official aviation authority sources. 
+                      This tool is for reference and educational purposes only.
+                    </p>
+                  </div>
                 </div>
-                
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  AIRAC cycles ensure synchronized worldwide updates of aeronautical 
-                  information every 28 days, maintaining safety and consistency in 
-                  international aviation.
-                </p>
-                
-                <Link
-                  to="/about"
-                  className="text-primary-600 dark:text-primary-400 text-sm hover:underline"
-                >
-                  Learn more about AIRAC →
-                </Link>
               </div>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
         </div>
+        
+        {/* External Resources */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="mb-12 no-print"
+        >
+          <h2 className="text-xl font-semibold text-neutral-800 dark:text-white mb-4">
+            Related Resources
+          </h2>
+          
+          <div className={`p-6 rounded-xl ${
+            isDark ? 'bg-dark-100 border border-dark-accent' : 'bg-white shadow-medium'
+          }`}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <a 
+                href="https://www.faa.gov/air_traffic/flight_info/aeronav/aero_data/NASR_Subscription/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className={`flex items-center p-4 rounded-lg ${
+                  isDark 
+                    ? 'bg-dark-accent hover:bg-dark-accent/70' 
+                    : 'bg-neutral-50 hover:bg-neutral-100'
+                }`}
+              >
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                  isDark ? 'bg-primary-900/30' : 'bg-primary-50'
+                }`}>
+                  <ExternalLink className="w-6 h-6 text-primary-500 dark:text-primary-400" />
+                </div>
+                <div className="ml-4">
+                  <h3 className="text-sm font-medium text-neutral-800 dark:text-white">
+                    FAA NASR Data
+                  </h3>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    Official FAA Aeronautical Data
+                  </p>
+                </div>
+              </a>
+              
+              <a 
+                href="https://www.eurocontrol.int/service/european-ais-database" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className={`flex items-center p-4 rounded-lg ${
+                  isDark 
+                    ? 'bg-dark-accent hover:bg-dark-accent/70' 
+                    : 'bg-neutral-50 hover:bg-neutral-100'
+                }`}
+              >
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                  isDark ? 'bg-primary-900/30' : 'bg-primary-50'
+                }`}>
+                  <ExternalLink className="w-6 h-6 text-primary-500 dark:text-primary-400" />
+                </div>
+                <div className="ml-4">
+                  <h3 className="text-sm font-medium text-neutral-800 dark:text-white">
+                    EAD System
+                  </h3>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    European AIS Database
+                  </p>
+                </div>
+              </a>
+              
+              <a 
+                href="https://www.icao.int/safety/information-management/Pages/default.aspx" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className={`flex items-center p-4 rounded-lg ${
+                  isDark 
+                    ? 'bg-dark-accent hover:bg-dark-accent/70' 
+                    : 'bg-neutral-50 hover:bg-neutral-100'
+                }`}
+              >
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                  isDark ? 'bg-primary-900/30' : 'bg-primary-50'
+                }`}>
+                  <ExternalLink className="w-6 h-6 text-primary-500 dark:text-primary-400" />
+                </div>
+                <div className="ml-4">
+                  <h3 className="text-sm font-medium text-neutral-800 dark:text-white">
+                    ICAO Information Management
+                  </h3>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    Official ICAO Standards
+                  </p>
+                </div>
+              </a>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </div>
   )
