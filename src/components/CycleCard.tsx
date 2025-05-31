@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Calendar, Clock, ArrowRight, ChevronRight } from 'lucide-react'
 import { format } from 'date-fns'
 import type { AiracCycle } from '@/types/airac'
+import { useTheme } from '@/contexts/ThemeContext'
 
 interface CycleCardProps {
   cycle: AiracCycle
@@ -10,6 +11,8 @@ interface CycleCardProps {
 }
 
 export function CycleCard({ cycle, viewMode }: CycleCardProps) {
+  const { isDark } = useTheme()
+  
   const getStatusBadge = () => {
     if (cycle.isCurrent) {
       return <span className="badge-success">Current</span>
@@ -40,7 +43,9 @@ export function CycleCard({ cycle, viewMode }: CycleCardProps) {
           animate={{ opacity: 1, y: 0 }}
           whileHover={{ y: -2 }}
           transition={{ duration: 0.2 }}
-          className="card p-4 cursor-pointer hover:shadow-medium transition-all duration-200"
+          className={`card p-4 cursor-pointer hover:shadow-medium transition-all duration-200 ${
+            isDark ? 'bg-dark-100 border-dark-accent hover:shadow-dark-medium' : ''
+          }`}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-6">
@@ -94,9 +99,11 @@ export function CycleCard({ cycle, viewMode }: CycleCardProps) {
         animate={{ opacity: 1, y: 0 }}
         whileHover={{ y: -4 }}
         transition={{ duration: 0.2 }}
-        className={`card p-5 relative overflow-hidden cursor-pointer hover:shadow-medium ${
-          cycle.isCurrent ? 'border-l-4 border-l-primary-500' : ''
-        }`}
+        className={`card p-5 relative overflow-hidden cursor-pointer hover:shadow-medium 
+          ${cycle.isCurrent ? 'border-l-4 border-l-primary-500' : ''}
+          ${isDark ? 'bg-dark-100 border-dark-accent hover:shadow-dark-medium' : ''}
+          ${cycle.isCurrent && isDark ? 'dark-glow' : ''}
+        `}
       >
         {/* Status indicator */}
         <div className="absolute top-4 right-4">
@@ -116,7 +123,9 @@ export function CycleCard({ cycle, viewMode }: CycleCardProps) {
         {/* Dates */}
         <div className="space-y-3 mb-6">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center flex-shrink-0">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+              isDark ? 'bg-dark-accent' : 'bg-primary-50 dark:bg-primary-900/20'
+            }`}>
               <Calendar className="w-4 h-4 text-primary-500 dark:text-primary-400" />
             </div>
             <div>
@@ -128,7 +137,9 @@ export function CycleCard({ cycle, viewMode }: CycleCardProps) {
           </div>
           
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center flex-shrink-0">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+              isDark ? 'bg-dark-accent' : 'bg-primary-50 dark:bg-primary-900/20'
+            }`}>
               <Calendar className="w-4 h-4 text-primary-500 dark:text-primary-400" />
             </div>
             <div>
@@ -157,7 +168,9 @@ export function CycleCard({ cycle, viewMode }: CycleCardProps) {
         
         {/* Current cycle highlight */}
         {cycle.isCurrent && !cycle.isUpcoming && (
-          <div className="absolute -left-1 top-0 bottom-0 w-1 bg-primary-500"></div>
+          <div className={`absolute -left-1 top-0 bottom-0 w-1 bg-primary-500 ${
+            isDark ? 'shadow-glow' : ''
+          }`}></div>
         )}
       </motion.div>
     </Link>

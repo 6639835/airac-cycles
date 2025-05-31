@@ -19,7 +19,7 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
-  const { theme, toggleTheme } = useTheme()
+  const { theme, toggleTheme, isDark } = useTheme()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const location = useLocation()
   const [scrolled, setScrolled] = useState(false)
@@ -43,17 +43,23 @@ export function Layout({ children }: LayoutProps) {
   const isActive = (path: string) => location.pathname === path
 
   return (
-    <div className="min-h-screen flex flex-col bg-neutral-50 dark:bg-neutral-900 transition-colors duration-300">
+    <div className={`min-h-screen flex flex-col bg-neutral-50 transition-colors duration-300 ${
+      isDark ? 'dark-bg-gradient' : ''
+    }`}>
       {/* Header */}
       <header className={`sticky top-0 z-50 transition-all duration-300 ${
-        scrolled ? 'backdrop-blur-lg bg-white/80 dark:bg-neutral-900/80 shadow-soft' : 'bg-transparent'
+        scrolled 
+          ? isDark 
+            ? 'backdrop-blur-lg bg-dark-200/80 shadow-dark-soft' 
+            : 'backdrop-blur-lg bg-white/80 shadow-soft' 
+          : 'bg-transparent'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 md:h-20">
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-3 focus-ring rounded-lg p-1 -ml-1">
               <div className="relative">
-                <div className="bg-primary-500 p-2 rounded-md">
+                <div className={`bg-primary-500 p-2 rounded-md ${isDark ? 'animate-pulse-glow' : ''}`}>
                   <Plane className="w-5 h-5 text-white" />
                 </div>
               </div>
@@ -75,8 +81,12 @@ export function Layout({ children }: LayoutProps) {
                   to={item.href}
                   className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus-ring ${
                     isActive(item.href)
-                      ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-500 dark:text-primary-400'
-                      : 'text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                      ? isDark
+                        ? 'bg-dark-accent text-primary-400'
+                        : 'bg-primary-50 text-primary-500'
+                      : `text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 ${
+                          isDark ? 'dark:hover:bg-dark-accent/50' : 'dark:hover:bg-neutral-800'
+                        }`
                   }`}
                 >
                   <item.icon className="w-4 h-4" />
@@ -89,7 +99,11 @@ export function Layout({ children }: LayoutProps) {
             <div className="flex items-center space-x-1">
               <button
                 onClick={toggleTheme}
-                className="p-2 rounded-lg text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors focus-ring"
+                className={`p-2 rounded-lg transition-colors focus-ring ${
+                  isDark 
+                    ? 'text-neutral-300 hover:bg-dark-accent/50' 
+                    : 'text-neutral-600 hover:bg-neutral-100'
+                }`}
                 aria-label="Toggle theme"
               >
                 {theme === 'dark' ? (
@@ -101,7 +115,11 @@ export function Layout({ children }: LayoutProps) {
 
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 rounded-lg text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors focus-ring md:hidden"
+                className={`p-2 rounded-lg md:hidden transition-colors focus-ring ${
+                  isDark 
+                    ? 'text-neutral-300 hover:bg-dark-accent/50' 
+                    : 'text-neutral-600 hover:bg-neutral-100'
+                }`}
                 aria-label="Toggle mobile menu"
               >
                 {isMobileMenuOpen ? (
@@ -122,7 +140,11 @@ export function Layout({ children }: LayoutProps) {
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
-              className="md:hidden border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden"
+              className={`md:hidden overflow-hidden ${
+                isDark 
+                  ? 'border-t border-dark-accent bg-dark-200' 
+                  : 'border-t border-neutral-200 bg-white'
+              }`}
             >
               <div className="px-4 py-3 space-y-1">
                 {navigation.map((item) => (
@@ -132,8 +154,12 @@ export function Layout({ children }: LayoutProps) {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                       isActive(item.href)
-                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-500 dark:text-primary-400'
-                        : 'text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                        ? isDark
+                          ? 'bg-dark-accent text-primary-400'
+                          : 'bg-primary-50 text-primary-500'
+                        : `text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 ${
+                            isDark ? 'dark:hover:bg-dark-accent/50' : 'dark:hover:bg-neutral-800'
+                          }`
                     }`}
                   >
                     <item.icon className="w-4 h-4" />
@@ -149,18 +175,18 @@ export function Layout({ children }: LayoutProps) {
       {/* Main Content */}
       <main className="flex-1 pt-4 pb-16">
         <div className="relative">
-          <div className="subtle-noise" aria-hidden="true"></div>
+          <div className={`subtle-noise ${isDark ? 'opacity-[0.03]' : ''}`} aria-hidden="true"></div>
           {children}
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="bg-white dark:bg-neutral-900 border-t border-neutral-100 dark:border-neutral-800">
+      <footer className={isDark ? 'bg-dark-200 border-t border-dark-accent' : 'bg-white border-t border-neutral-100'}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="bg-primary-500 p-2 rounded-md">
+                <div className={`bg-primary-500 p-2 rounded-md ${isDark ? 'shadow-glow' : ''}`}>
                   <Plane className="w-4 h-4 text-white" />
                 </div>
                 <h3 className="font-medium text-neutral-900 dark:text-white">
@@ -194,7 +220,9 @@ export function Layout({ children }: LayoutProps) {
             </div>
           </div>
 
-          <div className="mt-8 pt-8 border-t border-neutral-100 dark:border-neutral-800">
+          <div className={`mt-8 pt-8 ${
+            isDark ? 'border-t border-dark-accent' : 'border-t border-neutral-100'
+          }`}>
             <div className="flex flex-col md:flex-row justify-between items-center">
               <p className="text-neutral-500 dark:text-neutral-400 text-sm">
                 © 2024 AIRAC Explorer. Built with modern web technologies.

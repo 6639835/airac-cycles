@@ -51,12 +51,21 @@ export default {
           900: '#1A1A1A',
           950: '#0D0D0D',
         },
+        dark: {
+          100: '#202022', // Dark mode card
+          200: '#19191b', // Dark mode background 
+          300: '#121214', // Dark mode darker bg
+          400: '#0c0c0e', // Darkest background
+          accent: '#2a2a30', // Dark mode borders
+          highlight: 'rgba(255, 255, 255, 0.05)', // Highlights for dark mode
+        }
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',
         'slide-up': 'slideUp 0.3s ease-in-out',
         'slide-down': 'slideDown 0.3s ease-in-out',
         'scale-in': 'scaleIn 0.2s ease-out',
+        'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -75,11 +84,22 @@ export default {
           '0%': { transform: 'scale(0.95)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
+        pulseGlow: {
+          '0%, 100%': { opacity: 1, boxShadow: '0 0 15px rgba(10, 37, 64, 0.35)' },
+          '50%': { opacity: 0.7, boxShadow: '0 0 25px rgba(10, 37, 64, 0.5)' },
+        },
       },
       boxShadow: {
         'soft': '0 2px 8px rgba(0, 0, 0, 0.05)',
         'medium': '0 4px 16px rgba(0, 0, 0, 0.08)',
         'hard': '0 8px 30px rgba(0, 0, 0, 0.12)',
+        'dark-soft': '0 2px 10px rgba(0, 0, 0, 0.3)',
+        'dark-medium': '0 4px 20px rgba(0, 0, 0, 0.4)',
+        'dark-hard': '0 8px 30px rgba(0, 0, 0, 0.5)',
+        'inner-dark': 'inset 0 2px 4px rgba(0, 0, 0, 0.06)',
+        'inner-darker': 'inset 0 2px 4px rgba(0, 0, 0, 0.15)',
+        'glow': '0 0 15px rgba(99, 102, 241, 0.15)',
+        'glow-strong': '0 0 25px rgba(99, 102, 241, 0.3)',
       },
       borderRadius: {
         'sm': '4px',
@@ -93,6 +113,11 @@ export default {
         '80': '20rem',
         '96': '24rem',
         '128': '32rem',
+      },
+      backgroundImage: {
+        'dark-gradient': 'linear-gradient(to bottom right, var(--tw-gradient-stops))',
+        'dark-radial': 'radial-gradient(circle at center, var(--tw-gradient-stops))',
+        'dark-glow': 'linear-gradient(to bottom right, rgba(10, 37, 64, 0.1), rgba(10, 37, 64, 0))',
       },
     },
   },

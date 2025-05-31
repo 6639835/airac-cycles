@@ -17,6 +17,10 @@
     letter-spacing: -0.01em;
   }
 
+  .dark body {
+    color-scheme: dark;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-display font-semibold;
     letter-spacing: -0.02em;
@@ -62,7 +66,7 @@
   }
   
   .btn-primary {
-    @apply btn bg-primary-500 text-white hover:bg-primary-600 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:ring-offset-neutral-900;
+    @apply btn bg-primary-500 text-white hover:bg-primary-600 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:ring-offset-neutral-900 dark:bg-primary-600 dark:hover:bg-primary-700;
   }
   
   .btn-secondary {
@@ -70,15 +74,23 @@
   }
   
   .btn-ghost {
-    @apply btn bg-transparent text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800;
+    @apply btn bg-transparent text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800/50;
   }
   
   .card {
-    @apply bg-white dark:bg-neutral-900 rounded-xl shadow-soft border border-neutral-100 dark:border-neutral-800 transition-all duration-200;
+    @apply bg-white dark:bg-neutral-900 rounded-xl shadow-soft border border-neutral-100 dark:border-neutral-800/80 transition-all duration-200;
+  }
+
+  .dark .card {
+    @apply shadow-dark;
   }
   
   .card-hover {
     @apply card hover:-translate-y-1 hover:shadow-medium transition-all duration-200;
+  }
+
+  .dark .card-hover:hover {
+    @apply shadow-dark-medium;
   }
   
   .input {
@@ -90,15 +102,15 @@
   }
   
   .badge-success {
-    @apply badge bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100;
+    @apply badge bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300;
   }
   
   .badge-warning {
-    @apply badge bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100;
+    @apply badge bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300;
   }
   
   .badge-error {
-    @apply badge bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100;
+    @apply badge bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300;
   }
   
   .badge-neutral {
@@ -117,6 +129,10 @@
 @layer utilities {
   .text-gradient {
     @apply bg-gradient-to-r from-primary-500 to-secondary-400 bg-clip-text text-transparent;
+  }
+
+  .dark .text-gradient {
+    @apply from-primary-400 to-secondary-300;
   }
   
   .scrollbar-thin {
@@ -153,12 +169,36 @@
     height: 100%;
   }
 
+  .dark .subtle-noise {
+    opacity: 0.05;
+  }
+
   .focus-ring {
     @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900;
   }
 
   .text-balance {
     text-wrap: balance;
+  }
+
+  .shadow-dark {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  }
+
+  .shadow-dark-medium {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  .dark-glow {
+    box-shadow: 0 0 15px rgba(10, 37, 64, 0.35);
+  }
+
+  .dark-border {
+    @apply border-neutral-800/80;
+  }
+
+  .dark-bg-gradient {
+    @apply bg-gradient-to-br from-neutral-900 to-neutral-950;
   }
 }
 
