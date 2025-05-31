@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { 
@@ -9,7 +9,8 @@ import {
   Share2,
   Calendar as CalendarIcon,
   Info,
-  ArrowRight
+  ArrowRight,
+  ChevronDown
 } from 'lucide-react'
 import { 
   format, 
@@ -23,7 +24,8 @@ import {
   isWithinInterval,
   startOfWeek,
   endOfWeek,
-  isToday
+  isToday,
+  differenceInDays
 } from 'date-fns'
 import { useAirac } from '@/hooks/useAirac'
 import type { AiracCycle } from '@/types/airac'
@@ -35,6 +37,25 @@ export function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedCycle, setSelectedCycle] = useState<AiracCycle | null>(null)
   const [showExportMenu, setShowExportMenu] = useState(false)
+  const [showYearSelector, setShowYearSelector] = useState(false)
+
+  // Get all available years from cycles
+  const availableYears = useMemo(() => {
+    const years = new Set<number>()
+    const currentYear = new Date().getFullYear()
+    
+    // Add a range of years around the current year
+    for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+      years.add(i)
+    }
+    
+    // Add years from cycles
+    allCycles.forEach(cycle => {
+      years.add(cycle.year)
+    })
+    
+    return Array.from(years).sort((a, b) => a - b)
+  }, [allCycles])
 
   // Get calendar days for the current month
   const calendarDays = useMemo(() => {
@@ -83,6 +104,13 @@ export function CalendarPage() {
     } catch (err) {
       console.error('Failed to copy: ', err)
     }
+  }
+
+  const changeYear = (year: number) => {
+    const newDate = new Date(currentDate)
+    newDate.setFullYear(year)
+    setCurrentDate(newDate)
+    setShowYearSelector(false)
   }
 
   // Export functions
@@ -195,6 +223,55 @@ END:VEVENT`
     }
     setShowExportMenu(false)
   }
+
+  // Add keyboard navigation
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+      return; // Don't handle in form elements
+    }
+
+    switch (e.key) {
+      case 'ArrowLeft':
+        navigateMonth('prev');
+        break;
+      case 'ArrowRight':
+        navigateMonth('next');
+        break;
+      case 'Home':
+        goToToday();
+        break;
+      case 'Escape':
+        setSelectedCycle(null);
+        setShowExportMenu(false);
+        setShowYearSelector(false);
+        break;
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown]);
+
+  // Add this to show cycle indicators and improve day cells
+  const CycleIndicator = ({ cycle }: { cycle: AiracCycle }) => {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.2 }}
+        className={`h-1.5 rounded-full mt-1 ${
+          cycle.isCurrent
+            ? isDark ? 'bg-green-500 shadow-glow-sm' : 'bg-green-500'
+            : cycle.isUpcoming
+              ? isDark ? 'bg-amber-500' : 'bg-amber-500'
+              : isDark ? 'bg-neutral-500' : 'bg-neutral-400'
+        }`}
+      />
+    );
+  };
 
   return (
     <div className={`min-h-screen ${
@@ -337,25 +414,76 @@ END:VEVENT`
             isDark ? 'bg-dark-100 border border-dark-accent' : 'bg-white shadow-soft'
           }`}
         >
-          <button
-            onClick={() => navigateMonth('prev')}
-            className={`p-2 rounded-lg transition-colors ${
-              isDark 
-                ? 'bg-dark-accent text-neutral-400 hover:text-neutral-300' 
-                : 'bg-neutral-50 text-neutral-500 hover:bg-neutral-100'
-            }`}
-            title="Previous Month"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          
-          <div className="text-center">
-            <h2 className="text-xl font-medium text-neutral-800 dark:text-white">
-              {format(currentDate, 'MMMM yyyy')}
-            </h2>
-            <div className="text-sm text-neutral-500 dark:text-neutral-400">
-              {monthCycles.length} AIRAC cycles
+          <div className="flex items-center">
+            <button
+              onClick={() => navigateMonth('prev')}
+              className={`p-2 rounded-lg transition-colors ${
+                isDark 
+                  ? 'bg-dark-accent text-neutral-400 hover:text-neutral-300' 
+                  : 'bg-neutral-50 text-neutral-500 hover:bg-neutral-100'
+              }`}
+              title="Previous Month"
+              aria-label="Previous Month"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            
+            <div className="text-center mx-4 relative">
+              <button 
+                onClick={() => setShowYearSelector(!showYearSelector)}
+                className="flex items-center text-xl font-medium text-neutral-800 dark:text-white hover:text-primary-500 dark:hover:text-primary-400 transition-colors duration-150"
+              >
+                {format(currentDate, 'MMMM yyyy')}
+                <ChevronDown className="w-4 h-4 ml-1" />
+              </button>
+              
+              {showYearSelector && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`absolute top-full left-0 mt-2 z-20 p-2 rounded-lg w-48 max-h-64 overflow-y-auto ${
+                    isDark ? 'bg-dark-100 border border-dark-accent shadow-dark-medium' : 'bg-white shadow-medium'
+                  }`}
+                >
+                  <div className="grid grid-cols-2 gap-2">
+                    {availableYears.map(year => (
+                      <button
+                        key={year}
+                        onClick={() => changeYear(year)}
+                        className={`px-2 py-1.5 text-sm rounded ${
+                          currentDate.getFullYear() === year
+                            ? isDark 
+                              ? 'bg-primary-500 text-white' 
+                              : 'bg-primary-500 text-white'
+                            : isDark 
+                              ? 'hover:bg-dark-accent text-neutral-300' 
+                              : 'hover:bg-neutral-100 text-neutral-700'
+                        }`}
+                      >
+                        {year}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+              
+              <div className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                {monthCycles.length} AIRAC cycles
+              </div>
             </div>
+            
+            <button
+              onClick={() => navigateMonth('next')}
+              className={`p-2 rounded-lg transition-colors ${
+                isDark 
+                  ? 'bg-dark-accent text-neutral-400 hover:text-neutral-300' 
+                  : 'bg-neutral-50 text-neutral-500 hover:bg-neutral-100'
+              }`}
+              title="Next Month"
+              aria-label="Next Month"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
           
           <div className="flex items-center space-x-2">
@@ -370,132 +498,296 @@ END:VEVENT`
               Today
             </button>
             
-            <button
-              onClick={() => navigateMonth('next')}
-              className={`p-2 rounded-lg transition-colors ${
-                isDark 
-                  ? 'bg-dark-accent text-neutral-400 hover:text-neutral-300' 
-                  : 'bg-neutral-50 text-neutral-500 hover:bg-neutral-100'
-              }`}
-              title="Next Month"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
+            <div className="flex border divide-x rounded-lg overflow-hidden">
+              {[0, 1, 2].map(monthOffset => {
+                const date = addMonths(new Date(), monthOffset)
+                return (
+                  <button
+                    key={monthOffset}
+                    onClick={() => setCurrentDate(date)}
+                    className={`px-3 py-1.5 text-xs font-medium ${
+                      isSameMonth(date, currentDate)
+                        ? isDark 
+                          ? 'bg-primary-500 text-white border-primary-500' 
+                          : 'bg-primary-500 text-white border-primary-500'
+                        : isDark 
+                          ? 'bg-dark-accent text-neutral-300 hover:bg-dark-accent/70 border-dark-accent' 
+                          : 'bg-white text-neutral-600 hover:bg-neutral-100 border-neutral-200'
+                    }`}
+                  >
+                    {format(date, 'MMM')}
+                  </button>
+                )
+              })}
+            </div>
           </div>
         </motion.div>
         
-        {/* Calendar Grid */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="mb-8"
-        >
-          {/* Weekday Headers */}
-          <div className="grid grid-cols-7 mb-2">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
-              <div 
-                key={day} 
-                className={`text-center font-medium py-2 ${
-                  isDark ? 'text-neutral-300' : 'text-neutral-700'
-                } ${i === 0 || i === 6 ? isDark ? 'text-neutral-400' : 'text-neutral-500' : ''}`}
-              >
-                {day}
+        {/* Just before the main calendar grid, add a mini-calendar for quick navigation */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+          <div className="lg:col-span-3">
+            {/* Main calendar remains unchanged */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+            >
+              {/* Weekday Headers */}
+              <div className="grid grid-cols-7 mb-2">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
+                  <div 
+                    key={day} 
+                    className={`text-center font-medium py-2 ${
+                      isDark ? 'text-neutral-300' : 'text-neutral-700'
+                    } ${i === 0 || i === 6 ? isDark ? 'text-neutral-400' : 'text-neutral-500' : ''}`}
+                  >
+                    {day}
+                  </div>
+                ))}
               </div>
-            ))}
+              
+              {/* Calendar Grid */}
+              <div className={`grid grid-cols-7 rounded-xl overflow-hidden border ${
+                isDark ? 'border-dark-accent' : 'border-neutral-200'
+              }`}>
+                {calendarDays.map((day, index) => {
+                  const isSameMonthDay = isSameMonth(day, currentDate)
+                  const cycle = getCycleForDay(day)
+                  const isStart = cycle && isSameDay(day, cycle.startDate)
+                  const isEnd = cycle && isSameDay(day, cycle.endDate)
+                  const todayDate = isToday(day)
+                  
+                  // Get all cycles that this day belongs to (useful for multi-cycle days)
+                  const cyclesForDay = allCycles.filter(c => 
+                    isWithinInterval(day, { start: c.startDate, end: c.endDate })
+                  )
+                  
+                  return (
+                    <motion.div 
+                      key={index}
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.2 }}
+                      className={`min-h-[120px] p-3 border border-opacity-50 relative ${
+                        isSameMonthDay 
+                          ? isDark 
+                            ? 'bg-dark-100 border-dark-accent hover:bg-dark-accent/30' 
+                            : 'bg-white border-neutral-100 hover:bg-neutral-50'
+                          : isDark 
+                            ? 'bg-dark-200 border-dark-accent/50 text-neutral-500' 
+                            : 'bg-neutral-50 border-neutral-100/50 text-neutral-400'
+                      } ${
+                        todayDate 
+                          ? isDark 
+                            ? 'ring-2 ring-primary-500/70 ring-inset' 
+                            : 'ring-2 ring-primary-500 ring-inset'
+                          : ''
+                      } cursor-pointer transition-colors duration-200`}
+                      onClick={() => cycle && setSelectedCycle(cycle)}
+                      title={cycle ? `AIRAC ${cycle.cycle}${isStart ? ' (Start)' : isEnd ? ' (End)' : ''}` : format(day, 'MMMM d, yyyy')}
+                      aria-label={cycle 
+                        ? `${format(day, 'MMMM d, yyyy')} - AIRAC ${cycle.cycle}${isStart ? ' Start' : isEnd ? ' End' : ''}`
+                        : format(day, 'MMMM d, yyyy')
+                      }
+                    >
+                      <div className="flex justify-between items-start">
+                        <span className={`text-sm font-medium ${
+                          todayDate 
+                            ? 'text-primary-500 dark:text-primary-400' 
+                            : isSameMonthDay 
+                              ? 'text-neutral-800 dark:text-neutral-200' 
+                              : 'text-neutral-500 dark:text-neutral-500'
+                        }`}>
+                          {format(day, 'd')}
+                        </span>
+                        
+                        {todayDate && (
+                          <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                            isDark ? 'bg-primary-900/30 text-primary-400' : 'bg-primary-50 text-primary-500'
+                          }`}>
+                            Today
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Cycle labels */}
+                      <div className="mt-1 space-y-1 flex-1">
+                        {cycle && (
+                          <div 
+                            className={`text-xs p-1.5 rounded-lg mb-1 transition-colors ${
+                              isStart || isEnd
+                                ? cycle.isCurrent
+                                  ? isDark 
+                                    ? 'bg-green-900/30 text-green-400 border border-green-800/50' 
+                                    : 'bg-green-50 text-green-700 border border-green-100'
+                                  : cycle.isUpcoming
+                                    ? isDark 
+                                      ? 'bg-amber-900/30 text-amber-400 border border-amber-800/50' 
+                                      : 'bg-amber-50 text-amber-700 border border-amber-100'
+                                    : isDark 
+                                      ? 'bg-neutral-800/50 text-neutral-300 border border-neutral-700/50' 
+                                      : 'bg-neutral-100 text-neutral-700 border border-neutral-200'
+                                : ''
+                            }`}
+                          >
+                            {isStart && (
+                              <div className="font-medium">
+                                {cycle.cycle} Start
+                              </div>
+                            )}
+                            {isEnd && (
+                              <div className="font-medium">
+                                {cycle.cycle} End
+                              </div>
+                            )}
+                            {!isStart && !isEnd && (
+                              <div className="font-medium">
+                                {cycle.cycle}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Cycle indicators at the bottom */}
+                      {cyclesForDay.length > 0 && (
+                        <div className="absolute bottom-1.5 left-3 right-3 flex space-x-1">
+                          {cyclesForDay.slice(0, 3).map((c, i) => (
+                            <CycleIndicator key={i} cycle={c} />
+                          ))}
+                          {cyclesForDay.length > 3 && (
+                            <div className={`text-xs ${
+                              isDark ? 'text-neutral-400' : 'text-neutral-500'
+                            }`}>
+                              +{cyclesForDay.length - 3}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </motion.div>
           </div>
           
-          {/* Calendar Grid */}
-          <div className={`grid grid-cols-7 rounded-xl overflow-hidden border ${
-            isDark ? 'border-dark-accent' : 'border-neutral-200'
-          }`}>
-            {calendarDays.map((day, index) => {
-              const isSameMonthDay = isSameMonth(day, currentDate)
-              const cycle = getCycleForDay(day)
-              const isStart = cycle && isSameDay(day, cycle.startDate)
-              const isEnd = cycle && isSameDay(day, cycle.endDate)
-              const todayDate = isToday(day)
+          <div className="hidden lg:block">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+              className={`p-4 rounded-xl mb-6 ${
+                isDark ? 'bg-dark-100 border border-dark-accent' : 'bg-white shadow-medium'
+              }`}
+            >
+              <h3 className="text-lg font-medium text-neutral-800 dark:text-white mb-4">
+                Quick Navigation
+              </h3>
               
-              return (
-                <div 
-                  key={index}
-                  className={`min-h-[120px] p-3 border border-opacity-50 relative ${
-                    isSameMonthDay 
-                      ? isDark 
-                        ? 'bg-dark-100 border-dark-accent hover:bg-dark-accent/30' 
-                        : 'bg-white border-neutral-100 hover:bg-neutral-50'
-                      : isDark 
-                        ? 'bg-dark-200 border-dark-accent/50 text-neutral-500' 
-                        : 'bg-neutral-50 border-neutral-100/50 text-neutral-400'
-                  } ${
-                    todayDate 
-                      ? isDark 
-                        ? 'ring-2 ring-primary-500/70 ring-inset' 
-                        : 'ring-2 ring-primary-500 ring-inset'
-                      : ''
-                  }`}
-                  onClick={() => cycle && setSelectedCycle(cycle)}
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <span className={`text-sm font-medium ${
-                      todayDate 
-                        ? 'text-primary-500 dark:text-primary-400' 
-                        : isSameMonthDay 
-                          ? 'text-neutral-800 dark:text-neutral-200' 
-                          : 'text-neutral-500 dark:text-neutral-500'
-                    }`}>
-                      {format(day, 'd')}
-                    </span>
-                    
-                    {todayDate && (
-                      <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                        isDark ? 'bg-primary-900/30 text-primary-400' : 'bg-primary-50 text-primary-500'
-                      }`}>
-                        Today
-                      </span>
-                    )}
-                  </div>
+              {/* Mini Calendar - Next 3 months */}
+              <div className="space-y-6">
+                {[0, 1, 2].map(monthOffset => {
+                  const monthDate = addMonths(currentDate, monthOffset);
+                  const monthStart = startOfMonth(monthDate);
+                  const monthEnd = endOfMonth(monthDate);
+                  const startDay = startOfWeek(monthStart);
+                  const endDay = endOfWeek(monthEnd);
+                  const days = eachDayOfInterval({ start: startDay, end: endDay });
                   
-                  {cycle && (
-                    <div 
-                      className={`text-xs p-1.5 rounded-lg mb-1 transition-colors ${
-                        isStart || isEnd
-                          ? cycle.isCurrent
-                            ? isDark 
-                              ? 'bg-green-900/30 text-green-400 border border-green-800/50' 
-                              : 'bg-green-50 text-green-700 border border-green-100'
-                            : cycle.isUpcoming
-                              ? isDark 
-                                ? 'bg-amber-900/30 text-amber-400 border border-amber-800/50' 
-                                : 'bg-amber-50 text-amber-700 border border-amber-100'
-                              : isDark 
-                                ? 'bg-neutral-800/50 text-neutral-300 border border-neutral-700/50' 
-                                : 'bg-neutral-100 text-neutral-700 border border-neutral-200'
-                          : ''
-                      }`}
-                    >
-                      {isStart && (
-                        <div className="font-medium">
-                          {cycle.cycle} Start
-                        </div>
-                      )}
-                      {isEnd && (
-                        <div className="font-medium">
-                          {cycle.cycle} End
-                        </div>
-                      )}
-                      {!isStart && !isEnd && (
-                        <div className="font-medium">
-                          {cycle.cycle}
-                        </div>
-                      )}
+                  return (
+                    <div key={monthOffset} className="space-y-2">
+                      <h4 className={`text-sm font-medium ${
+                        isSameMonth(monthDate, currentDate) 
+                          ? 'text-primary-500 dark:text-primary-400' 
+                          : 'text-neutral-700 dark:text-neutral-300'
+                      }`}>
+                        {format(monthDate, 'MMMM yyyy')}
+                      </h4>
+                      
+                      <div className="grid grid-cols-7 gap-1">
+                        {['S','M','T','W','T','F','S'].map((d, i) => (
+                          <div key={i} className="text-center text-xs text-neutral-500 dark:text-neutral-400">
+                            {d}
+                          </div>
+                        ))}
+                        
+                        {days.map((day, i) => (
+                          <button
+                            key={i}
+                            onClick={() => {
+                              setCurrentDate(day);
+                              const cycle = getCycleForDay(day);
+                              if (cycle) setSelectedCycle(cycle);
+                            }}
+                            className={`text-center text-xs p-1.5 rounded-full ${
+                              !isSameMonth(day, monthDate)
+                                ? 'text-neutral-400 dark:text-neutral-600'
+                                : isToday(day)
+                                  ? 'bg-primary-500 text-white dark:text-white'
+                                  : isSameDay(day, currentDate)
+                                    ? isDark 
+                                      ? 'bg-dark-accent text-white' 
+                                      : 'bg-neutral-200 text-neutral-800'
+                                    : getCycleForDay(day)
+                                      ? isDark 
+                                        ? 'text-neutral-300 hover:bg-dark-accent/50' 
+                                        : 'text-neutral-700 hover:bg-neutral-100'
+                                      : isDark 
+                                        ? 'text-neutral-400 hover:bg-dark-accent/30' 
+                                        : 'text-neutral-600 hover:bg-neutral-50'
+                            }`}
+                          >
+                            {format(day, 'd')}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  )}
+                  );
+                })}
+              </div>
+            </motion.div>
+            
+            {/* Quick Access section */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.4 }}
+              className={`p-4 rounded-xl ${
+                isDark ? 'bg-dark-100 border border-dark-accent' : 'bg-white shadow-medium'
+              }`}
+            >
+              <h3 className="text-lg font-medium text-neutral-800 dark:text-white mb-4">
+                Keyboard Shortcuts
+              </h3>
+              
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-neutral-600 dark:text-neutral-400">Previous month</span>
+                  <kbd className={`px-2 py-1 text-xs rounded ${
+                    isDark ? 'bg-dark-accent text-neutral-300' : 'bg-neutral-100 text-neutral-700'
+                  }`}>←</kbd>
                 </div>
-              )
-            })}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-neutral-600 dark:text-neutral-400">Next month</span>
+                  <kbd className={`px-2 py-1 text-xs rounded ${
+                    isDark ? 'bg-dark-accent text-neutral-300' : 'bg-neutral-100 text-neutral-700'
+                  }`}>→</kbd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-neutral-600 dark:text-neutral-400">Go to today</span>
+                  <kbd className={`px-2 py-1 text-xs rounded ${
+                    isDark ? 'bg-dark-accent text-neutral-300' : 'bg-neutral-100 text-neutral-700'
+                  }`}>Home</kbd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-neutral-600 dark:text-neutral-400">Close popups</span>
+                  <kbd className={`px-2 py-1 text-xs rounded ${
+                    isDark ? 'bg-dark-accent text-neutral-300' : 'bg-neutral-100 text-neutral-700'
+                  }`}>Esc</kbd>
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
+        </div>
         
         {/* Legend */}
         <motion.div
@@ -543,11 +835,12 @@ END:VEVENT`
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.3 }}
             className={`p-6 rounded-xl mb-8 ${
               isDark ? 'bg-dark-100 border border-dark-accent' : 'bg-white shadow-medium'
             }`}
           >
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
               <div className="flex items-center">
                 <div className={`p-3 rounded-lg mr-4 ${
                   selectedCycle.isCurrent
@@ -559,31 +852,59 @@ END:VEVENT`
                   <CalendarIcon className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-medium text-neutral-800 dark:text-white">
+                  <motion.h3 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: 0.1 }}
+                    className="text-2xl font-medium text-neutral-800 dark:text-white"
+                  >
                     {selectedCycle.cycle}
-                  </h3>
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                  </motion.h3>
+                  <motion.p 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: 0.2 }}
+                    className="text-sm text-neutral-600 dark:text-neutral-400"
+                  >
                     {selectedCycle.isCurrent ? 'Current Cycle' : selectedCycle.isUpcoming ? 'Upcoming Cycle' : 'Past Cycle'}
-                  </p>
+                  </motion.p>
                 </div>
               </div>
               
-              <button
-                onClick={() => setSelectedCycle(null)}
-                className={`mt-3 md:mt-0 px-3 py-1.5 rounded-lg text-sm ${
-                  isDark 
-                    ? 'bg-dark-accent text-neutral-400 hover:text-neutral-300' 
-                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                }`}
-              >
-                Close Details
-              </button>
+              <div className="flex mt-4 md:mt-0 space-x-2">
+                <Link
+                  to={`/cycle/${selectedCycle.id}`}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
+                    isDark 
+                      ? 'bg-primary-500 text-white hover:bg-primary-600' 
+                      : 'bg-primary-500 text-white hover:bg-primary-600'
+                  }`}
+                >
+                  View Details
+                </Link>
+                
+                <button
+                  onClick={() => setSelectedCycle(null)}
+                  className={`px-3 py-1.5 rounded-lg text-sm ${
+                    isDark 
+                      ? 'bg-dark-accent text-neutral-400 hover:text-neutral-300' 
+                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                  }`}
+                >
+                  Close
+                </button>
+              </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className={`p-4 rounded-lg ${
-                isDark ? 'bg-dark-accent/50' : 'bg-neutral-50'
-              }`}>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+                className={`p-4 rounded-lg ${
+                  isDark ? 'bg-dark-accent/50' : 'bg-neutral-50'
+                }`}
+              >
                 <div className="text-sm text-neutral-500 dark:text-neutral-400 mb-1">
                   Start Date
                 </div>
@@ -593,11 +914,16 @@ END:VEVENT`
                 <div className="text-xs text-neutral-500 dark:text-neutral-400">
                   {format(selectedCycle.startDate, 'EEEE')}
                 </div>
-              </div>
+              </motion.div>
               
-              <div className={`p-4 rounded-lg ${
-                isDark ? 'bg-dark-accent/50' : 'bg-neutral-50'
-              }`}>
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
+                className={`p-4 rounded-lg ${
+                  isDark ? 'bg-dark-accent/50' : 'bg-neutral-50'
+                }`}
+              >
                 <div className="text-sm text-neutral-500 dark:text-neutral-400 mb-1">
                   End Date
                 </div>
@@ -607,11 +933,32 @@ END:VEVENT`
                 <div className="text-xs text-neutral-500 dark:text-neutral-400">
                   {format(selectedCycle.endDate, 'EEEE')}
                 </div>
-              </div>
+              </motion.div>
               
-              <div className={`p-4 rounded-lg ${
-                isDark ? 'bg-dark-accent/50' : 'bg-neutral-50'
-              }`}>
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.3 }}
+                className={`p-4 rounded-lg ${
+                  isDark ? 'bg-dark-accent/50' : 'bg-neutral-50'
+                }`}
+              >
+                <div className="text-sm text-neutral-500 dark:text-neutral-400 mb-1">
+                  Duration
+                </div>
+                <div className="text-lg font-medium text-neutral-900 dark:text-white">
+                  {differenceInDays(selectedCycle.endDate, selectedCycle.startDate) + 1} days
+                </div>
+              </motion.div>
+              
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.4 }}
+                className={`p-4 rounded-lg ${
+                  isDark ? 'bg-dark-accent/50' : 'bg-neutral-50'
+                }`}
+              >
                 <div className="text-sm text-neutral-500 dark:text-neutral-400 mb-1">
                   {selectedCycle.isCurrent ? 'Remaining' : selectedCycle.isUpcoming ? 'Starts In' : 'Ended'}
                 </div>
@@ -623,10 +970,53 @@ END:VEVENT`
                       : `${selectedCycle.daysSinceStart || 0} days ago`
                   }
                 </div>
-              </div>
+              </motion.div>
             </div>
             
-            <div className="mt-5 pt-5 border-t border-neutral-100 dark:border-dark-accent">
+            {/* Cycle Progress bar */}
+            {selectedCycle.isCurrent && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+                className="mt-6"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                    Cycle Progress
+                  </div>
+                  <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                    {Math.round((selectedCycle.daysSinceStart || 0) / 
+                    ((selectedCycle.daysSinceStart || 0) + (selectedCycle.daysUntilEnd || 0)) * 100)}%
+                  </div>
+                </div>
+                
+                <div className={`relative h-2 w-full rounded-full overflow-hidden ${
+                  isDark ? 'bg-dark-accent' : 'bg-neutral-100'
+                }`}>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.round((selectedCycle.daysSinceStart || 0) / 
+                      ((selectedCycle.daysSinceStart || 0) + (selectedCycle.daysUntilEnd || 0)) * 100)}%` }}
+                    transition={{ duration: 1 }}
+                    className={`absolute top-0 left-0 h-full rounded-full ${
+                      isDark ? 'bg-primary-500 shadow-glow' : 'bg-primary-500'
+                    }`}
+                  />
+                </div>
+              </motion.div>
+            )}
+            
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.5 }}
+              className="mt-5 pt-5 border-t border-neutral-100 dark:border-dark-accent flex justify-between items-center"
+            >
+              <div className="text-sm text-neutral-600 dark:text-neutral-400">
+                AIRAC {selectedCycle.cycle} &middot; {selectedCycle.year} &middot; Cycle {selectedCycle.cycleNumber}
+              </div>
+              
               <Link 
                 to={`/cycle/${selectedCycle.id}`}
                 className={`inline-flex items-center font-medium ${
@@ -636,7 +1026,7 @@ END:VEVENT`
                 <span>View full cycle details</span>
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
-            </div>
+            </motion.div>
           </motion.div>
         )}
         
