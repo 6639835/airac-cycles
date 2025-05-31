@@ -19,30 +19,40 @@ function ScrollToTop() {
   return null
 }
 
+function AppContent() {
+  const location = useLocation()
+  
+  return (
+    <>
+      <ScrollToTop />
+      <AnimatePresence mode="wait">
+        <Layout>
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/calendar" element={<CalendarPage />} />
+              <Route path="/cycle/:cycleId" element={<CycleDetailPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/about" element={<AboutPage />} />
+            </Routes>
+          </motion.div>
+        </Layout>
+      </AnimatePresence>
+    </>
+  )
+}
+
 function App() {
   return (
     <ThemeProvider>
       <Router>
-        <ScrollToTop />
-        <AnimatePresence mode="wait">
-          <Layout>
-            <motion.div
-              key={location?.pathname}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/calendar" element={<CalendarPage />} />
-                <Route path="/cycle/:cycleId" element={<CycleDetailPage />} />
-                <Route path="/analytics" element={<AnalyticsPage />} />
-                <Route path="/about" element={<AboutPage />} />
-              </Routes>
-            </motion.div>
-          </Layout>
-        </AnimatePresence>
+        <AppContent />
       </Router>
     </ThemeProvider>
   )
