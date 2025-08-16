@@ -122,7 +122,7 @@ export function CalendarPage() {
     let filename = ''
 
     switch (exportFormat) {
-      case 'csv':
+      case 'csv': {
         const csvHeader = 'Cycle,Start Date,End Date,Status,Days in Month\n'
         const csvRows = monthCycles.map(cycle => {
           const status = cycle.isCurrent ? 'Current' : cycle.isUpcoming ? 'Upcoming' : 'Past'
@@ -132,8 +132,9 @@ export function CalendarPage() {
         mimeType = 'text/csv'
         filename = `airac-calendar-${monthName}.csv`
         break
+      }
 
-      case 'ical':
+      case 'ical': {
         const icalHeader = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//AIRAC Explorer//Calendar Export
@@ -160,8 +161,9 @@ END:VEVENT`
         mimeType = 'text/calendar'
         filename = `airac-calendar-${monthName}.ics`
         break
+      }
 
-      case 'json':
+      case 'json': {
         const jsonData = {
           month: format(currentDate, 'MMMM yyyy'),
           exportDate: new Date().toISOString(),
@@ -181,6 +183,7 @@ END:VEVENT`
         mimeType = 'application/json'
         filename = `airac-calendar-${monthName}.json`
         break
+      }
     }
 
     const blob = new Blob([content], { type: mimeType })

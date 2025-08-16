@@ -13,17 +13,17 @@ export default {
       },
       colors: {
         primary: {
-          50: '#f0f6ff',
-          100: '#e2edff',
-          200: '#c7d9ff',
-          300: '#a5bcff',
-          400: '#8295ff',
-          500: '#0A2540', // Deep navy
-          600: '#091e33',
-          700: '#071a2c',
-          800: '#051524',
-          900: '#03101c',
-          950: '#020a13',
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          200: '#bae6fd',
+          300: '#7dd3fc',
+          400: '#38bdf8',
+          500: '#0ea5e9',
+          600: '#0284c7',
+          700: '#0369a1',
+          800: '#075985',
+          900: '#0c4a6e',
+          950: '#082f49',
         },
         secondary: {
           50: '#edfcf7',
@@ -39,25 +39,31 @@ export default {
           950: '#0f211b',
         },
         neutral: {
-          50: '#F8F8F8', // Neutral background
-          100: '#EEEEEE',
-          200: '#E0E0E0',
-          300: '#CCCCCC',
-          400: '#ADADAD',
-          500: '#8A8A8A',
-          600: '#636363',
-          700: '#505050',
-          800: '#333333', // Dark gray body text
-          900: '#1A1A1A',
-          950: '#0D0D0D',
+          50: '#fafafa',
+          100: '#f5f5f5',
+          200: '#e5e5e5',
+          300: '#d4d4d4',
+          400: '#a3a3a3',
+          500: '#737373',
+          600: '#525252',
+          700: '#404040',
+          800: '#262626',
+          900: '#171717',
+          950: '#0a0a0a',
         },
         dark: {
-          100: '#202022', // Dark mode card
-          200: '#19191b', // Dark mode background 
-          300: '#121214', // Dark mode darker bg
-          400: '#0c0c0e', // Darkest background
-          accent: '#2a2a30', // Dark mode borders
-          highlight: 'rgba(255, 255, 255, 0.05)', // Highlights for dark mode
+          50: '#f8fafc',
+          100: '#1e293b',  // Dark cards with subtle blue tint
+          200: '#0f172a',  // Main dark background - deep navy
+          300: '#0c1420',  // Darker sections
+          400: '#06090f',  // Darkest elements
+          500: '#334155',  // Dark borders
+          600: '#475569',  // Dark text on light
+          700: '#64748b',  // Muted text
+          800: '#94a3b8',  // Light text on dark
+          900: '#cbd5e1',  // Lightest text
+          accent: '#1e40af', // Accent blue for dark mode
+          highlight: 'rgba(59, 130, 246, 0.1)', // Blue highlights
         }
       },
       animation: {

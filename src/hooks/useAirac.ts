@@ -7,9 +7,17 @@ import {
   searchAiracCycles 
 } from '@/utils/airacCalculator'
 
+
 export function useAirac() {
-  // Generate all cycles once
-  const allCycles = useMemo(() => generateAllAiracCycles(), [])
+  // Generate all cycles with error handling
+  const allCycles = useMemo(() => {
+    try {
+      return generateAllAiracCycles()
+    } catch (error) {
+      console.error('Error generating AIRAC cycles:', error)
+      throw new Error('Critical: Failed to generate AIRAC cycles')
+    }
+  }, [])
   
   // State for filters and pagination
   const [filters, setFilters] = useState<AiracFilters>({

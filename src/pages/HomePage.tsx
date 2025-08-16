@@ -78,10 +78,11 @@ export function HomePage() {
         case 'g':
           setViewMode(prev => prev === 'grid' ? 'list' : 'grid')
           break
-        case 's':
+        case 's': {
           const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement
           searchInput?.focus()
           break
+        }
         case 'r':
           setSearchTerm('')
           updateFilters({ search: '', year: 'all', status: 'all' })
@@ -109,7 +110,7 @@ export function HomePage() {
   }
 
   const handleStatusFilter = (status: string) => {
-    updateFilters({ status: status as any })
+    updateFilters({ status: status as 'all' | 'active' | 'upcoming' | 'past' })
   }
 
   const filteredBookmarkedCycles = cycles.filter(cycle => 

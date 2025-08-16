@@ -165,7 +165,7 @@ export function AnalyticsPage() {
         filename = `airac-analytics-${selectedYear}.json`
         break
 
-      case 'csv':
+      case 'csv': {
         // Create comprehensive CSV with multiple sheets worth of data
         const csvHeaders = [
           'Report Type,Value',
@@ -196,8 +196,9 @@ export function AnalyticsPage() {
         mimeType = 'text/csv'
         filename = `airac-analytics-${selectedYear}.csv`
         break
+      }
 
-      case 'pdf':
+      case 'pdf': {
         // Generate a simple HTML report for PDF printing
         const htmlReport = `
         <!DOCTYPE html>
@@ -284,6 +285,7 @@ export function AnalyticsPage() {
           }, 250)
         }
         return // Don't create download link for PDF
+      }
     }
 
     if (content) {
@@ -593,18 +595,18 @@ export function AnalyticsPage() {
 
             {/* Simple Bar Chart */}
             <div className="space-y-4">
-              {getChartData().slice(0, 10).map((item: any, index) => {
-                const maxValue = Math.max(...getChartData().map((d: any) => d.cycles || d.total || 0))
-                const percentage = ((item.cycles || item.total || 0) / maxValue) * 100
+              {getChartData().slice(0, 10).map((item: Record<string, unknown>, index) => {
+                const maxValue = Math.max(...getChartData().map((d: Record<string, unknown>) => (d['cycles'] as number) || (d['total'] as number) || 0))
+                const percentage = (((item['cycles'] as number) || (item['total'] as number) || 0) / maxValue) * 100
                 
                 return (
-                  <div key={item.label || item.quarter || item.month || index} className="space-y-2">
+                  <div key={(item['label'] as string) || (item['quarter'] as string) || (item['month'] as string) || index} className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="font-medium text-neutral-800 dark:text-white">
-                        {item.label || item.quarter || item.month}
+                        {(item['label'] as string) || (item['quarter'] as string) || (item['month'] as string)}
                       </span>
                       <span className="text-neutral-600 dark:text-neutral-400">
-                        {item.cycles || item.total || 0} cycles
+                        {(item['cycles'] as number) || (item['total'] as number) || 0} cycles
                       </span>
                     </div>
                     <div className={`w-full rounded-full h-3 overflow-hidden ${

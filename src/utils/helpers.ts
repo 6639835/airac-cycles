@@ -8,7 +8,7 @@ export const storage = {
       const item = localStorage.getItem(key)
       return item ? JSON.parse(item) : defaultValue
     } catch (error) {
-      console.error(`Error reading from localStorage for key ${key}:`, error)
+      // Error reading from localStorage
       return defaultValue
     }
   },
@@ -17,7 +17,7 @@ export const storage = {
     try {
       localStorage.setItem(key, JSON.stringify(value))
     } catch (error) {
-      console.error(`Error writing to localStorage for key ${key}:`, error)
+      // Error writing to localStorage
     }
   },
 
@@ -25,7 +25,7 @@ export const storage = {
     try {
       localStorage.removeItem(key)
     } catch (error) {
-      console.error(`Error removing from localStorage for key ${key}:`, error)
+      // Error removing from localStorage
     }
   },
 
@@ -33,7 +33,7 @@ export const storage = {
     try {
       localStorage.clear()
     } catch (error) {
-      console.error('Error clearing localStorage:', error)
+      // Error clearing localStorage
     }
   }
 }
@@ -146,7 +146,7 @@ export const recentlyViewed = {
 // Data Export Utilities
 export const exportUtils = {
   // Generate CSV content from data
-  generateCSV: (data: any[], headers: string[]): string => {
+  generateCSV: (data: Record<string, unknown>[], headers: string[]): string => {
     const csvHeaders = headers.join(',')
     const csvRows = data.map(row => 
       headers.map(header => {
@@ -208,7 +208,7 @@ END:VEVENT`
     const baseFilename = filename || `airac-cycles-${timestamp}`
 
     switch (format) {
-      case 'csv':
+      case 'csv': {
         const csvData = cycles.map(cycle => ({
           cycle: cycle.cycle,
           year: cycle.year,
@@ -222,8 +222,9 @@ END:VEVENT`
         const csvContent = exportUtils.generateCSV(csvData, Object.keys(csvData[0] || {}))
         exportUtils.downloadFile(csvContent, `${baseFilename}.csv`, 'text/csv')
         break
+      }
 
-      case 'json':
+      case 'json': {
         const jsonData = {
           exportDate: new Date().toISOString(),
           totalCycles: cycles.length,
@@ -242,11 +243,13 @@ END:VEVENT`
         }
         exportUtils.downloadFile(JSON.stringify(jsonData, null, 2), `${baseFilename}.json`, 'application/json')
         break
+      }
 
-      case 'ical':
+      case 'ical': {
         const icalContent = exportUtils.generateICAL(cycles, `AIRAC Cycles Export - ${timestamp}`)
         exportUtils.downloadFile(icalContent, `${baseFilename}.ics`, 'text/calendar')
         break
+      }
     }
   }
 }
@@ -259,7 +262,7 @@ export const urlUtils = {
   },
 
   // Build URL with parameters
-  buildUrl: (base: string, params: Record<string, any>): string => {
+  buildUrl: (base: string, params: Record<string, unknown>): string => {
     const url = new URL(base, window.location.origin)
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
@@ -275,7 +278,7 @@ export const urlUtils = {
       await navigator.clipboard.writeText(text)
       return true
     } catch (error) {
-      console.error('Failed to copy to clipboard:', error)
+      // Failed to copy to clipboard
       return false
     }
   },
@@ -287,7 +290,7 @@ export const urlUtils = {
         await navigator.share(data)
         return true
       } catch (error) {
-        console.error('Error sharing:', error)
+        // Error sharing
         return false
       }
     } else {
@@ -376,7 +379,7 @@ export const searchUtils = {
 // Performance Utilities
 export const performanceUtils = {
   // Debounce function
-  debounce: <T extends (...args: any[]) => any>(
+  debounce: <T extends (...args: unknown[]) => unknown>(
     func: T,
     wait: number
   ): ((...args: Parameters<T>) => void) => {
@@ -388,7 +391,7 @@ export const performanceUtils = {
   },
 
   // Throttle function
-  throttle: <T extends (...args: any[]) => any>(
+  throttle: <T extends (...args: unknown[]) => unknown>(
     func: T,
     limit: number
   ): ((...args: Parameters<T>) => void) => {
@@ -403,10 +406,10 @@ export const performanceUtils = {
   },
 
   // Measure execution time
-  measureTime: <T>(name: string, fn: () => T): T => {
-    console.time(name)
+  measureTime: <T>(_name: string, fn: () => T): T => {
+    if (process.env['NODE_ENV'] === 'development') console.time(_name)
     const result = fn()
-    console.timeEnd(name)
+    if (process.env['NODE_ENV'] === 'development') console.timeEnd(_name)
     return result
   }
 }
@@ -420,7 +423,7 @@ export const validation = {
   },
 
   // Validate required fields
-  isRequired: (value: any): boolean => {
+  isRequired: (value: unknown): boolean => {
     return value !== null && value !== undefined && value !== ''
   },
 
@@ -488,13 +491,13 @@ export const a11y = {
 // Analytics and Tracking (placeholder for future implementation)
 export const analytics = {
   // Track page view
-  trackPageView: (page: string): void => {
-    console.log(`Page view: ${page}`)
+  trackPageView: (_page: string): void => {
+    // Track page view
   },
 
   // Track event
-  trackEvent: (event: string, data?: any): void => {
-    console.log(`Event: ${event}`, data)
+  trackEvent: (_event: string, _data?: Record<string, unknown>): void => {
+    // Track event
   },
 
   // Track cycle view
@@ -512,8 +515,8 @@ export const analytics = {
 // Error Handling Utilities
 export const errorUtils = {
   // Handle and log errors
-  handleError: (error: Error, context?: string): void => {
-    console.error(`Error${context ? ` in ${context}` : ''}:`, error)
+  handleError: (_error: Error, _context?: string): void => {
+    // Error occurred
     
     // In production, you might want to send errors to a logging service
     if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {

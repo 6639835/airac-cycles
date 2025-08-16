@@ -1,0 +1,125 @@
+{
+  "name": "AIRAC Cycles Explorer",
+  "short_name": "AIRAC Explorer",
+  "description": "Modern AIRAC Cycles Explorer - Comprehensive aeronautical information regulation and control cycles database",
+  "version": "2.0.0",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["productivity", "education", "business"],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-home.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "AIRAC Explorer Home Page on Desktop"
+    },
+    {
+      "src": "/screenshots/mobile-home.png", 
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "AIRAC Explorer Home Page on Mobile"
+    }
+  ],
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-96x96.png", 
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128", 
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Current Cycle",
+      "short_name": "Current",
+      "description": "View the current AIRAC cycle",
+      "url": "/?current=true",
+      "icons": [
+        {
+          "src": "/icons/shortcut-current.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Calendar View",
+      "short_name": "Calendar", 
+      "description": "Browse cycles in calendar view",
+      "url": "/calendar",
+      "icons": [
+        {
+          "src": "/icons/shortcut-calendar.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "short_name": "Analytics",
+      "description": "View cycle analytics and statistics", 
+      "url": "/analytics",
+      "icons": [
+        {
+          "src": "/icons/shortcut-analytics.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_includes": true,
+  "iarc_rating_id": "e58c174a-81d2-5c3c-32cc-34b8de4a52e9"
+}
