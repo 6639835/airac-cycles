@@ -25,7 +25,7 @@ import {
 import { useAirac } from '@/hooks/useAirac'
 import { CycleCard } from '@/components/CycleCard'
 import { CurrentCycleCard } from '@/components/CurrentCycleCard'
-import { useTheme } from '@/contexts/ThemeContext'
+import { useTheme } from '@/hooks/useTheme'
 
 interface FeatureItem {
   title: string;

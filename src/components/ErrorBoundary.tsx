@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react'
 import { AlertTriangle, RefreshCw, Home, ChevronDown } from 'lucide-react'
+import { log } from '@/utils/logger'
 
 interface Props {
   children: ReactNode
@@ -33,7 +34,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo)
+    log.error('ErrorBoundary caught an error', { error, errorInfo }, 'ErrorBoundary')
     
     this.setState({
       error,
@@ -50,7 +51,7 @@ export class ErrorBoundary extends Component<Props, State> {
   private logErrorToService(error: Error, errorInfo: ErrorInfo) {
     // Placeholder for error logging service integration
     // Example: Sentry, LogRocket, etc.
-    console.log('Would send to error service:', { error, errorInfo })
+    log.info('Would send to error service', { error, errorInfo }, 'ErrorBoundary')
   }
 
   private handleReload = () => {
@@ -191,12 +192,12 @@ export function withErrorBoundary<P extends object>(
 // Hook for functional components to handle errors
 export function useErrorHandler() {
   const handleError = React.useCallback((error: Error, errorInfo?: string) => {
-    console.error('Error caught by useErrorHandler:', error)
+    log.error('Error caught by useErrorHandler', { error, errorInfo }, 'useErrorHandler')
     
     // In production, send to error tracking service
     if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
       // Send to error tracking service
-      console.log('Would send to error service:', { error, errorInfo })
+      log.info('Would send to error service', { error, errorInfo }, 'useErrorHandler')
     }
   }, [])
 

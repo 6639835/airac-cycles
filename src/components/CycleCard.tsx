@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Calendar, Clock, ArrowRight, ChevronRight } from 'lucide-react'
 import { format } from 'date-fns'
 import type { AiracCycle } from '@/types/airac'
-import { useTheme } from '@/contexts/ThemeContext'
+import { useTheme } from '@/hooks/useTheme'
 
 interface CycleCardProps {
   cycle: AiracCycle

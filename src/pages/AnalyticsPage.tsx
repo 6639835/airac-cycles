@@ -17,7 +17,7 @@ import {
 } from 'lucide-react'
 import { useAirac } from '@/hooks/useAirac'
 import { format, differenceInDays } from 'date-fns'
-import { useTheme } from '@/contexts/ThemeContext'
+import { useTheme } from '@/hooks/useTheme'
 
 export function AnalyticsPage() {
   const { allCycles, currentCycle, stats } = useAirac()

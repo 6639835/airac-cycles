@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { log } from '@/utils/logger'
 import { 
   Calendar, 
   ArrowLeft, 
@@ -21,7 +22,7 @@ import {
 import { format, differenceInDays } from 'date-fns'
 import { useAirac } from '@/hooks/useAirac'
 import type { AiracCycle } from '@/types/airac'
-import { useTheme } from '@/contexts/ThemeContext'
+import { useTheme } from '@/hooks/useTheme'
 
 export function CycleDetailPage() {
   const { cycleId } = useParams<{ cycleId: string }>()
@@ -129,7 +130,7 @@ export function CycleDetailPage() {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
-      console.error('Failed to copy: ', err)
+      log.error('Failed to copy cycle details', err, 'CycleDetailPage')
     }
   }
 

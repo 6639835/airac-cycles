@@ -12,7 +12,7 @@ import {
   Info,
   Calendar
 } from 'lucide-react'
-import { useTheme } from '@/contexts/ThemeContext'
+import { useTheme } from '@/hooks/useTheme'
 
 interface LayoutProps {
   children: React.ReactNode

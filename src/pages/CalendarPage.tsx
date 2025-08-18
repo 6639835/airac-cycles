@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
+import { log } from '@/utils/logger'
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -29,7 +30,7 @@ import {
 } from 'date-fns'
 import { useAirac } from '@/hooks/useAirac'
 import type { AiracCycle } from '@/types/airac'
-import { useTheme } from '@/contexts/ThemeContext'
+import { useTheme } from '@/hooks/useTheme'
 
 export function CalendarPage() {
   const { allCycles } = useAirac()
@@ -102,7 +103,7 @@ export function CalendarPage() {
       // No need to set copied state as we removed it
       setTimeout(() => {}, 2000)
     } catch (err) {
-      console.error('Failed to copy: ', err)
+      log.error('Failed to copy to clipboard', err, 'CalendarPage')
     }
   }
 
@@ -214,14 +215,14 @@ END:VEVENT`
       try {
         await navigator.share(shareData)
       } catch (err) {
-        console.log('Error sharing:', err)
+        log.warn('Error sharing calendar', err, 'CalendarPage')
       }
     } else {
       // Fallback: copy to clipboard
       try {
         await copyToClipboard(`${shareData.title}\n${shareData.text}\n${shareData.url}`)
       } catch (err) {
-        console.log('Error copying to clipboard:', err)
+        log.error('Error copying calendar to clipboard', err, 'CalendarPage')
       }
     }
     setShowExportMenu(false)

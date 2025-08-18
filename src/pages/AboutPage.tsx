@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
+import { log } from '@/utils/logger'
 import { 
   Plane, 
   Calendar, 
@@ -22,7 +23,7 @@ import {
   BarChart,
   Users
 } from 'lucide-react'
-import { useTheme } from '@/contexts/ThemeContext'
+import { useTheme } from '@/hooks/useTheme'
 
 export function AboutPage() {
   const { isDark } = useTheme()
@@ -160,7 +161,7 @@ export function AboutPage() {
   const handleFeedbackSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // In a real application, this would send the feedback to a server
-    console.log('Feedback submitted:', feedbackForm)
+    log.info('Feedback submitted', feedbackForm, 'AboutPage')
     setFeedbackSubmitted(true)
   }
 

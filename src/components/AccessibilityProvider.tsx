@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useCallback } from 'react'
+import React, { createContext, useState, useCallback } from 'react'
 
-interface AccessibilityContextType {
+export interface AccessibilityContextType {
   announceToScreenReader: (message: string) => void
   highContrast: boolean
   toggleHighContrast: () => void
@@ -10,7 +10,8 @@ interface AccessibilityContextType {
   setFontSize: (size: 'small' | 'medium' | 'large') => void
 }
 
-const AccessibilityContext = createContext<AccessibilityContextType | undefined>(undefined)
+// eslint-disable-next-line react-refresh/only-export-components
+export const AccessibilityContext = createContext<AccessibilityContextType | undefined>(undefined)
 
 export function AccessibilityProvider({ children }: { children: React.ReactNode }) {
   const [highContrast, setHighContrast] = useState(() => {
@@ -92,13 +93,13 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
     announceToScreenReader(`Font size changed to ${size}`)
   }, [announceToScreenReader])
 
-  // Apply initial settings on mount
+  // Apply settings when they change
   React.useEffect(() => {
     document.body.classList.toggle('high-contrast', highContrast)
     document.body.classList.toggle('reduced-motion', reducedMotion)
     document.body.classList.remove('font-small', 'font-medium', 'font-large')
     document.body.classList.add(`font-${fontSize}`)
-  }, [])
+  }, [fontSize, highContrast, reducedMotion])
 
   const value: AccessibilityContextType = {
     announceToScreenReader,
@@ -115,14 +116,6 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
       {children}
     </AccessibilityContext.Provider>
   )
-}
-
-export function useAccessibility() {
-  const context = useContext(AccessibilityContext)
-  if (context === undefined) {
-    throw new Error('useAccessibility must be used within an AccessibilityProvider')
-  }
-  return context
 }
 
 // Accessibility utility components

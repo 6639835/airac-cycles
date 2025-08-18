@@ -6,6 +6,7 @@ import {
   calculateAiracStats,
   searchAiracCycles 
 } from '@/utils/airacCalculator'
+import { log } from '@/utils/logger'
 
 
 export function useAirac() {
@@ -14,7 +15,7 @@ export function useAirac() {
     try {
       return generateAllAiracCycles()
     } catch (error) {
-      console.error('Error generating AIRAC cycles:', error)
+      log.error('Error generating AIRAC cycles', error, 'useAirac')
       throw new Error('Critical: Failed to generate AIRAC cycles')
     }
   }, [])

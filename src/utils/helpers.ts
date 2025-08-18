@@ -1,5 +1,6 @@
 import { format as dateFnsFormat } from 'date-fns'
 import type { AiracCycle } from '@/types/airac'
+import { log } from '@/utils/logger'
 
 // Local Storage Utilities
 export const storage = {
@@ -406,10 +407,17 @@ export const performanceUtils = {
   },
 
   // Measure execution time
-  measureTime: <T>(_name: string, fn: () => T): T => {
-    if (process.env['NODE_ENV'] === 'development') console.time(_name)
+  measureTime: <T>(name: string, fn: () => T): T => {
+    const startTime = performance.now()
     const result = fn()
-    if (process.env['NODE_ENV'] === 'development') console.timeEnd(_name)
+    const endTime = performance.now()
+    
+    if (import.meta.env.DEV) {
+      log.debug(`${name} execution time`, { 
+        duration: `${(endTime - startTime).toFixed(2)}ms` 
+      }, 'PerformanceMonitor')
+    }
+    
     return result
   }
 }
